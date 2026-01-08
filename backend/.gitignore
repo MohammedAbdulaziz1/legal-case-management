@@ -1,0 +1,64 @@
+# Laravel
+*.log
+.DS_Store
+
+# Environment files
+.env
+.env.backup
+.env.production
+.env.local
+.env.*.local
+
+# PHP
+.phpactor.json
+.phpunit.result.cache
+/.phpunit.cache
+
+# IDE
+/.fleet
+/.idea
+/.nova
+/.vscode
+/.zed
+
+# Dependencies
+/node_modules
+/vendor
+/auth.json
+
+# Build files
+/public/build
+/public/hot
+/public/storage
+
+# Storage
+/storage/*.key
+/storage/pail
+/storage/logs/*.log
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+/database/*.sqlite
+/database/*.sqlite3
+
+# Bootstrap cache
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+
+# Homestead
+Homestead.json
+Homestead.yaml
+Homestead.yml
+
+# Windows
+Thumbs.db

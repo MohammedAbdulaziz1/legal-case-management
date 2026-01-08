@@ -1,0 +1,48 @@
+===========================================
+UPDATE .env FILE FOR MYSQL
+===========================================
+
+Open this file in a text editor:
+/Applications/XAMPP/xamppfiles/htdocs/backend/.env
+
+Find these lines and update them:
+
+CHANGE FROM:
+DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
+
+CHANGE TO:
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=samalegal
+DB_USERNAME=root
+DB_PASSWORD=
+
+(Leave DB_PASSWORD empty if MySQL has no password, or add your password)
+
+===========================================
+AFTER UPDATING .env:
+===========================================
+
+1. Clear config cache:
+   php artisan config:clear
+
+2. Create database in phpMyAdmin:
+   - Go to http://localhost/phpmyadmin
+   - Create database: samalegal
+   - Collation: utf8mb4_unicode_ci
+
+3. Run migrations:
+   php artisan migrate:fresh --force
+
+4. Seed database:
+   php artisan db:seed --force
+
+5. Test API:
+   curl -X POST http://127.0.0.1:8000/api/auth/login \
+     -H "Content-Type: application/json" \
+     -d '{"email":"admin@firm.com","password":"password"}'
+
+===========================================
+
