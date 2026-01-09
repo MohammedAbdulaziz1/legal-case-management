@@ -71,12 +71,14 @@ const PrimaryCaseEdit = () => {
   const breadcrumbs = [
     { label: 'الرئيسية', path: '/dashboard' },
     { label: 'القضايا الابتدائية', path: '/cases/primary' },
+    ...(isNew ? [] : [{ label: `القضية ${formData.caseNumber}`, path: `/cases/primary/${id}` }]),
     { label: isNew ? 'إضافة قضية جديدة' : `تعديل القضية ${formData.caseNumber}` }
   ]
 
   const headerBreadcrumbs = [
     { label: 'القضايا' },
     { label: 'القضايا الابتدائية', path: '/cases/primary' },
+    ...(isNew ? [] : [{ label: `القضية ${formData.caseNumber}`, path: `/cases/primary/${id}` }]),
     { label: isNew ? 'إضافة قضية جديدة' : `تعديل القضية ${formData.caseNumber}` }
   ]
 

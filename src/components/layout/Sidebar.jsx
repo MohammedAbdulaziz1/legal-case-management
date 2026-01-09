@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import Logo from '../common/Logo'
 
 const Sidebar = () => {
   const { user } = useAuth()
@@ -16,11 +17,9 @@ const Sidebar = () => {
     <aside className="w-72 bg-white dark:bg-[#1e2736] border-l border-slate-200 dark:border-slate-800 flex-shrink-0 flex flex-col hidden lg:flex h-screen sticky top-0 z-30 transition-all duration-300">
       <div className="h-20 flex items-center px-6 border-b border-slate-100 dark:border-slate-800">
         <div className="flex items-center gap-3">
-          <div className="size-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-            <span className="material-symbols-outlined text-3xl">gavel</span>
-          </div>
+          <Logo size="md" variant="primary" />
           <div>
-            <h1 className="text-base font-bold leading-tight">نظام إدارة القضايا</h1>
+            <h1 className="text-base font-bold leading-tight text-slate-900 dark:text-white">تنفيذ</h1>
             <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">لوحة التحكم القانونية</p>
           </div>
         </div>

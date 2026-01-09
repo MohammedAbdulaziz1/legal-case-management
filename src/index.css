@@ -21,8 +21,33 @@
   background: #94a3b8;
 }
 
+html {
+  background-color: #ffffff;
+  transition: background-color 0.2s ease;
+}
+
+html.dark {
+  background-color: #101622;
+}
+
 body {
   font-family: 'Noto Sans Arabic', 'Inter', sans-serif;
+  background-color: #ffffff;
+  transition: background-color 0.2s ease;
+}
+
+html.dark body {
+  background-color: #101622;
+}
+
+#root {
+  background-color: #ffffff;
+  transition: background-color 0.2s ease;
+  min-height: 100vh;
+}
+
+html.dark #root {
+  background-color: #101622;
 }
 
 .material-symbols-outlined {

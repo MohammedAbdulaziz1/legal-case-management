@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import Input from '../../components/common/Input'
 import Button from '../../components/common/Button'
+import Logo from '../../components/common/Logo'
 import { validateLoginForm } from '../../utils/validation'
 
 const Login = () => {
@@ -42,24 +43,15 @@ const Login = () => {
   }
 
   return (
-    <div className="relative flex min-h-screen w-full">
+    <div className="relative flex min-h-screen w-full bg-white dark:bg-[#101622]">
       {/* Right Side: Login Form */}
       <div className="flex flex-col justify-center w-full lg:w-1/2 px-4 py-12 sm:px-6 lg:px-20 xl:px-24 bg-background-light dark:bg-background-dark z-10">
         <div className="mx-auto w-full max-w-sm lg:w-96">
           {/* Header / Logo */}
           <div className="flex items-center gap-3 mb-10">
-            <div className="flex items-center justify-center size-10 rounded-xl bg-primary/10 text-primary">
-              <svg className="size-6" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-                <path
-                  clipRule="evenodd"
-                  d="M24 4H6V17.3333V30.6667H24V44H42V30.6667V17.3333H24V4Z"
-                  fill="currentColor"
-                  fillRule="evenodd"
-                ></path>
-              </svg>
-            </div>
+            <Logo size="md" variant="primary" />
             <h2 className="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em]">
-              نظام القضايا
+              تنفيذ
             </h2>
           </div>
 
@@ -157,14 +149,14 @@ const Login = () => {
           src="https://lh3.googleusercontent.com/aida-public/AB6AXuAH-LbH7IOcySYzfzQG3lN6NUIDvjxxhBdbnnIOzuHCzO2-ux-DuM5pf5kN4kFsz79hTfBQHJu-d_GAkXB7vf9rtVjRxXWbCCpjR4LPETEIzeYOVak4f6NTjyjR0f8bBjzICRuFNr9AVtmC2VrWXt1otCl5o_6wXSRk0wEUNRryYp-SAy7MlQeWC4P9KGXlVBCS5RiFOKm-9bhjkuRU3_oGEVtVKBayRVnNaxl9J2y5hGz1TvDvfHSb92B4Tm0xdNcS0xJGkmUtBlM"
         />
         <div className="absolute inset-0 z-30 flex flex-col justify-end p-20 pb-24 text-white">
-          <div className="mb-6 size-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center">
-            <span className="material-symbols-outlined text-white text-[32px]">gavel</span>
+          <div className="mb-6 size-12 rounded-xl bg-white/20 backdrop-blur-md flex items-center justify-center p-3">
+            <Logo size="lg" className="text-white" />
           </div>
           <blockquote className="space-y-2">
             <p className="text-lg font-medium leading-relaxed opacity-90">
               "العدالة هي أساس الملك، ونحن هنا لضمان سير الإجراءات القانونية بأعلى معايير الكفاءة والشفافية."
             </p>
-            <footer className="text-sm font-medium text-white/70">نظام إدارة المحاكم والقضايا</footer>
+            <footer className="text-sm font-medium text-white/70">تنفيذ</footer>
           </blockquote>
         </div>
       </div>

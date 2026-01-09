@@ -96,7 +96,8 @@ const AppealCaseEdit = () => {
   const breadcrumbs = [
     { label: 'الرئيسية', path: '/dashboard' },
     { label: 'القضايا الاستئنافية', path: '/cases/appeal' },
-    { label: isNew ? 'إضافة قضية جديدة' : `تعديل القضية ${formData.caseNumber}` }
+    ...(isNew ? [] : [{ label: `القضية ${formData.caseNumber || formData.appealNumber}`, path: `/cases/appeal/${id}` }]),
+    { label: isNew ? 'إضافة قضية جديدة' : `تعديل القضية ${formData.caseNumber || formData.appealNumber}` }
   ]
 
   const handleChange = (field, value) => {

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import { dashboardService } from '../../services/dashboardService'
 
 const Dashboard = () => {
+  const navigate = useNavigate()
   const [stats, setStats] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
@@ -26,7 +28,8 @@ const Dashboard = () => {
             change: '',
             changeType: 'positive',
             icon: 'folder_open',
-            color: 'bg-blue-500'
+            color: 'bg-blue-500',
+            path: '/cases/primary'
           },
           {
             title: 'القضايا الاستئنافية',
@@ -34,7 +37,8 @@ const Dashboard = () => {
             change: '',
             changeType: 'positive',
             icon: 'balance',
-            color: 'bg-purple-500'
+            color: 'bg-purple-500',
+            path: '/cases/appeal'
           },
           {
             title: 'قضايا المحكمة العليا',
@@ -42,7 +46,8 @@ const Dashboard = () => {
             change: '',
             changeType: 'positive',
             icon: 'account_balance',
-            color: 'bg-emerald-500'
+            color: 'bg-emerald-500',
+            path: '/cases/supreme'
           },
           {
             title: 'القضايا المعلقة',
@@ -50,7 +55,8 @@ const Dashboard = () => {
             change: '',
             changeType: 'negative',
             icon: 'pending',
-            color: 'bg-amber-500'
+            color: 'bg-amber-500',
+            path: '/cases/primary'
           }
         ])
       }
@@ -65,7 +71,8 @@ const Dashboard = () => {
           change: '',
           changeType: 'positive',
           icon: 'folder_open',
-          color: 'bg-blue-500'
+          color: 'bg-blue-500',
+          path: '/cases/primary'
         },
         {
           title: 'القضايا الاستئنافية',
@@ -73,7 +80,8 @@ const Dashboard = () => {
           change: '',
           changeType: 'positive',
           icon: 'balance',
-          color: 'bg-purple-500'
+          color: 'bg-purple-500',
+          path: '/cases/appeal'
         },
         {
           title: 'قضايا المحكمة العليا',
@@ -81,7 +89,8 @@ const Dashboard = () => {
           change: '',
           changeType: 'positive',
           icon: 'account_balance',
-          color: 'bg-emerald-500'
+          color: 'bg-emerald-500',
+          path: '/cases/supreme'
         },
         {
           title: 'القضايا المعلقة',
@@ -89,7 +98,8 @@ const Dashboard = () => {
           change: '',
           changeType: 'negative',
           icon: 'pending',
-          color: 'bg-amber-500'
+          color: 'bg-amber-500',
+          path: '/cases/primary'
         }
       ])
     } finally {
@@ -146,7 +156,11 @@ const Dashboard = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {stats.map((stat, index) => (
-            <Card key={index} className="p-6">
+            <Card 
+              key={index} 
+              className="p-6 cursor-pointer hover:shadow-lg transition-all duration-200 hover:scale-[1.02]"
+              onClick={() => stat.path && navigate(stat.path)}
+            >
               <div className="flex items-center justify-between mb-4">
                 <div className={`${stat.color} p-3 rounded-lg text-white`}>
                   <span className="material-symbols-outlined text-2xl">{stat.icon}</span>

@@ -78,6 +78,7 @@ const SupremeCourtCaseEdit = () => {
   const breadcrumbs = [
     { label: 'الرئيسية', path: '/dashboard' },
     { label: 'قضايا المحكمة العليا', path: '/cases/supreme' },
+    ...(isNew ? [] : [{ label: `القضية ${formData.caseNumber}`, path: `/cases/supreme/${id}` }]),
     { label: isNew ? 'إضافة قضية جديدة' : `تعديل القضية ${formData.caseNumber}` }
   ]
 
