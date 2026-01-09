@@ -20,7 +20,7 @@ const Sidebar = () => {
             <span className="material-symbols-outlined text-3xl">gavel</span>
           </div>
           <div>
-            <h1 className="text-base font-bold leading-tight">نظام إدارة القضايا</h1>
+            <h1 className="text-base font-bold leading-tight text-slate-900 dark:text-white">تنفيذ</h1>
             <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">لوحة التحكم القانونية</p>
           </div>
         </div>

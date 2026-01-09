@@ -59,7 +59,7 @@ const Login = () => {
               </svg>
             </div>
             <h2 className="text-slate-900 dark:text-white text-xl font-bold leading-tight tracking-[-0.015em]">
-              نظام القضايا
+              تنفيذ
             </h2>
           </div>
 
@@ -164,7 +164,7 @@ const Login = () => {
             <p className="text-lg font-medium leading-relaxed opacity-90">
               "العدالة هي أساس الملك، ونحن هنا لضمان سير الإجراءات القانونية بأعلى معايير الكفاءة والشفافية."
             </p>
-            <footer className="text-sm font-medium text-white/70">نظام إدارة المحاكم والقضايا</footer>
+            <footer className="text-sm font-medium text-white/70">تنفيذ</footer>
           </blockquote>
         </div>
       </div>
