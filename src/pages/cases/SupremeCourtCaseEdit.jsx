@@ -1,0 +1,300 @@
+import { useState, useEffect } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import Layout from '../../components/layout/Layout'
+import Card from '../../components/common/Card'
+import Input from '../../components/common/Input'
+import Select from '../../components/common/Select'
+import Button from '../../components/common/Button'
+import { CASE_STATUSES, CASE_STATUS_LABELS } from '../../utils/constants'
+import { caseService } from '../../services/caseService'
+
+const SupremeCourtCaseEdit = () => {
+  const { id } = useParams()
+  const navigate = useNavigate()
+  const isNew = id === 'new' || !id
+  const [loading, setLoading] = useState(!isNew)
+  const [formData, setFormData] = useState({
+    caseNumber: '',
+    registrationDate: '',
+    appealId: '',
+    court: '',
+    judge: '',
+    plaintiff: '',
+    defendant: '',
+    subject: '',
+    notes: '',
+    status: CASE_STATUSES.ACTIVE
+  })
+  const [appealCases, setAppealCases] = useState([])
+  const [errors, setErrors] = useState({})
+
+  useEffect(() => {
+    if (isNew) {
+      fetchAppealCases()
+    } else if (id) {
+      fetchCase()
+    }
+  }, [id, isNew])
+
+  const fetchAppealCases = async () => {
+    try {
+      const response = await caseService.getAppealCases({ per_page: 100 })
+      if (response.data.success) {
+        setAppealCases(response.data.data || [])
+      }
+    } catch (err) {
+      console.error('Error fetching appeal cases:', err)
+    }
+  }
+
+  const fetchCase = async () => {
+    try {
+      setLoading(true)
+      const response = await caseService.getSupremeCourtCase(id)
+      if (response.data.success) {
+        const caseData = response.data.data
+        setFormData({
+          caseNumber: caseData.caseNumber?.toString() || caseData.supremeCaseNumber?.toString() || '',
+          registrationDate: caseData.date || caseData.supremeDate || '',
+          appealId: caseData.appealId?.toString() || caseData.appealRequestId?.toString() || '',
+          court: 'المحكمة العليا - الرياض',
+          judge: '',
+          plaintiff: '',
+          defendant: '',
+          subject: '',
+          notes: caseData.notes || '',
+          status: caseData.status || CASE_STATUSES.ACTIVE
+        })
+      }
+    } catch (err) {
+      console.error('Error fetching supreme court case:', err)
+      alert('فشل في تحميل بيانات القضية')
+      navigate('/cases/supreme')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const breadcrumbs = [
+    { label: 'الرئيسية', path: '/dashboard' },
+    { label: 'قضايا المحكمة العليا', path: '/cases/supreme' },
+    ...(isNew ? [] : [{ label: `القضية ${formData.caseNumber}`, path: `/cases/supreme/${id}` }]),
+    { label: isNew ? 'إضافة قضية جديدة' : `تعديل القضية ${formData.caseNumber}` }
+  ]
+
+  const handleChange = (field, value) => {
+    setFormData(prev => ({ ...prev, [field]: value }))
+    // Clear error for this field when user types
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = { ...prev }
+        delete newErrors[field]
+        return newErrors
+      })
+    }
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    
+    // Validation
+    const validationErrors = {}
+    if (!formData.caseNumber) validationErrors.caseNumber = 'رقم القضية مطلوب'
+    if (!formData.registrationDate) validationErrors.registrationDate = 'تاريخ التسجيل مطلوب'
+    if (isNew && !formData.appealId) validationErrors.appealId = 'قضية الاستئناف مطلوبة'
+    
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors)
+      return
+    }
+    
+    setErrors({})
+    try {
+      if (isNew) {
+        await caseService.createSupremeCourtCase(formData)
+      } else {
+        await caseService.updateSupremeCourtCase(id, formData)
+      }
+      navigate('/cases/supreme')
+    } catch (err) {
+      console.error('Error saving supreme court case:', err)
+      
+      // Handle validation errors from API
+      if (err.response?.data?.errors) {
+        const apiErrors = err.response.data.errors
+        const formattedErrors = {}
+        Object.keys(apiErrors).forEach(key => {
+          const frontendKey = key === 'supreme_case_number' ? 'caseNumber' :
+                             key === 'supreme_date' ? 'registrationDate' :
+                             key === 'appeal_request_id' ? 'appealId' : key
+          formattedErrors[frontendKey] = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key]
+        })
+        setErrors(formattedErrors)
+        alert('يرجى تصحيح الأخطاء في النموذج')
+      } else {
+        const errorMessage = err.response?.data?.message || 'فشل في حفظ القضية'
+        alert(errorMessage)
+      }
+    }
+  }
+
+  if (loading) {
+    return (
+      <Layout breadcrumbs={breadcrumbs} headerBreadcrumbs={breadcrumbs}>
+        <div className="p-8 text-center">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+          <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">جاري تحميل بيانات القضية...</p>
+        </div>
+      </Layout>
+    )
+  }
+
+  return (
+    <Layout breadcrumbs={breadcrumbs} headerBreadcrumbs={breadcrumbs}>
+      <div className="flex flex-wrap justify-between items-end gap-4">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight mb-2">
+            {isNew ? 'إضافة قضية محكمة عليا جديدة' : 'تعديل بيانات القضية'}
+          </h1>
+          <p className="text-slate-500 dark:text-slate-400">
+            {isNew 
+              ? 'يرجى إدخال بيانات قضية المحكمة العليا الجديدة بدقة.'
+              : 'يرجى تحديث البيانات بدقة، سيتم حفظ نسخة من البيانات القديمة في الأرشيف.'}
+          </p>
+        </div>
+      </div>
+
+      <form onSubmit={handleSubmit}>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-4">
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <Card title="البيانات الأساسية" icon="info">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {isNew && (
+                  <div className="md:col-span-2">
+                    <Select
+                      label="قضية الاستئناف المرتبطة"
+                      value={formData.appealId}
+                      onChange={(e) => {
+                        handleChange('appealId', e.target.value)
+                        if (errors.appealId) setErrors(prev => ({ ...prev, appealId: '' }))
+                      }}
+                      error={errors.appealId}
+                      required
+                      options={[
+                        { value: '', label: 'اختر قضية الاستئناف' },
+                        ...appealCases.map(caseItem => ({
+                          value: caseItem.id?.toString() || caseItem.appealRequestId?.toString(),
+                          label: `استئناف #${caseItem.caseNumber || caseItem.appealNumber || caseItem.id} - ${caseItem.subject || caseItem.plaintiff || ''}`
+                        }))
+                      ]}
+                    />
+                  </div>
+                )}
+                <Input
+                  label="رقم القضية"
+                  value={formData.caseNumber}
+                  onChange={(e) => {
+                    handleChange('caseNumber', e.target.value)
+                    if (errors.caseNumber) setErrors(prev => ({ ...prev, caseNumber: '' }))
+                  }}
+                  disabled={!isNew}
+                  error={errors.caseNumber}
+                  required={isNew}
+                />
+                <Input
+                  label="تاريخ التسجيل"
+                  type="date"
+                  value={formData.registrationDate}
+                  onChange={(e) => {
+                    handleChange('registrationDate', e.target.value)
+                    if (errors.registrationDate) setErrors(prev => ({ ...prev, registrationDate: '' }))
+                  }}
+                  error={errors.registrationDate}
+                  required
+                />
+                <Select
+                  label="المحكمة المختصة"
+                  value={formData.court}
+                  onChange={(e) => handleChange('court', e.target.value)}
+                  options={[
+                    { value: 'المحكمة العليا - الرياض', label: 'المحكمة العليا - الرياض' }
+                  ]}
+                />
+                <Input
+                  label="اسم القاضي"
+                  value={formData.judge}
+                  onChange={(e) => handleChange('judge', e.target.value)}
+                />
+              </div>
+            </Card>
+
+            <Card title="أطراف القضية" icon="groups">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Input
+                  label="اسم المدعي"
+                  value={formData.plaintiff}
+                  onChange={(e) => handleChange('plaintiff', e.target.value)}
+                  icon="person"
+                />
+                <Input
+                  label="اسم المدعى عليه"
+                  value={formData.defendant}
+                  onChange={(e) => handleChange('defendant', e.target.value)}
+                  icon="person_off"
+                />
+              </div>
+            </Card>
+
+            <Card title="التفاصيل" icon="description">
+              <div className="flex flex-col gap-6">
+                <Input
+                  label="موضوع القضية"
+                  value={formData.subject}
+                  onChange={(e) => handleChange('subject', e.target.value)}
+                />
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                    ملاحظات
+                  </label>
+                  <textarea
+                    className="w-full px-4 py-3 rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none transition-all resize-none"
+                    rows="5"
+                    value={formData.notes}
+                    onChange={(e) => handleChange('notes', e.target.value)}
+                  />
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <Card className="p-6 sticky top-6">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
+              <Select
+                label="الحالة الحالية"
+                value={formData.status}
+                onChange={(e) => handleChange('status', e.target.value)}
+                options={Object.entries(CASE_STATUSES).map(([key, value]) => ({
+                  value,
+                  label: CASE_STATUS_LABELS[value]
+                }))}
+              />
+              <div className="border-t border-slate-200 dark:border-slate-700 my-4"></div>
+              <div className="flex flex-col gap-3">
+                <Button variant="primary" size="lg" icon="save" onClick={handleSubmit} className="w-full">
+                  {isNew ? 'إضافة القضية' : 'حفظ التعديلات'}
+                </Button>
+                <Button variant="secondary" size="lg" onClick={() => navigate('/cases/supreme')} className="w-full">
+                  إلغاء
+                </Button>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </form>
+    </Layout>
+  )
+}
+
+export default SupremeCourtCaseEdit
+

@@ -213,4 +213,3 @@ This project is proprietary software.
 ## Support
 
 For issues or questions, please contact the development team.
-

@@ -9,25 +9,41 @@ Thumbs.db
 Desktop.ini
 
 # Editor directories and files
-.vscode/
-.idea/
+.vscode/*
+!.vscode/extensions.json
+.idea
 *.swp
 *.swo
 *~
 .project
 .classpath
 .settings/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
 
 # Temporary files
 *.tmp
 *.temp
 *.bak
 *.backup
-*~
 
 # Logs
+logs
 *.log
-logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Node.js
+node_modules
+dist
+dist-ssr
+*.local
 
 # Environment files
 .env
@@ -47,4 +63,3 @@ logs/
 
 # Documentation build
 docs/_build/
-
