@@ -5,10 +5,13 @@ import Login from './pages/auth/Login'
 import Dashboard from './pages/dashboard/Dashboard'
 import PrimaryCases from './pages/cases/PrimaryCases'
 import PrimaryCaseEdit from './pages/cases/PrimaryCaseEdit'
+import PrimaryCaseDetail from './pages/cases/PrimaryCaseDetail'
 import AppealCases from './pages/cases/AppealCases'
 import AppealCaseEdit from './pages/cases/AppealCaseEdit'
+import AppealCaseDetail from './pages/cases/AppealCaseDetail'
 import SupremeCourtCases from './pages/cases/SupremeCourtCases'
 import SupremeCourtCaseEdit from './pages/cases/SupremeCourtCaseEdit'
+import SupremeCourtCaseDetail from './pages/cases/SupremeCourtCaseDetail'
 import UserPermissions from './pages/users/UserPermissions'
 import ArchiveLog from './pages/archive/ArchiveLog'
 import ProtectedRoute from './components/common/ProtectedRoute'
@@ -61,6 +64,14 @@ function App() {
               }
             />
             <Route
+              path="/cases/primary/:id"
+              element={
+                <ProtectedRoute>
+                  <PrimaryCaseDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/cases/appeal"
               element={
                 <ProtectedRoute>
@@ -85,6 +96,14 @@ function App() {
               }
             />
             <Route
+              path="/cases/appeal/:id"
+              element={
+                <ProtectedRoute>
+                  <AppealCaseDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/cases/supreme"
               element={
                 <ProtectedRoute>
@@ -105,6 +124,14 @@ function App() {
               element={
                 <ProtectedRoute>
                   <SupremeCourtCaseEdit />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/cases/supreme/:id"
+              element={
+                <ProtectedRoute>
+                  <SupremeCourtCaseDetail />
                 </ProtectedRoute>
               }
             />

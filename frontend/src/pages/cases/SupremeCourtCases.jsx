@@ -117,8 +117,12 @@ const SupremeCourtCases = () => {
                   {cases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.supremeRequestId
                     return (
-                      <tr key={caseId} className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-primary whitespace-nowrap cursor-pointer hover:underline">
+                      <tr 
+                        key={caseId} 
+                        className="group hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors cursor-pointer"
+                        onClick={() => navigate(`/cases/supreme/${caseId}`)}
+                      >
+                        <td className="px-6 py-4 font-medium text-primary whitespace-nowrap hover:underline">
                           {caseItem.supremeCaseNumber || caseId}
                         </td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.plaintiff || 'غير محدد'}</td>
@@ -131,7 +135,7 @@ const SupremeCourtCases = () => {
                           </StatusBadge>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2">
+                          <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                             <button
                               onClick={() => navigate(`/cases/supreme/${caseId}/edit`)}
                               className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
