@@ -14,7 +14,7 @@ legal-case-management/
 ## Technologies
 
 ### Frontend
-- **React** - UI framework
+- **React** - UI frameworkk
 - **Vite** - Build tool and dev server
 - **React Router** - Client-side routing
 - **Axios** - HTTP client
