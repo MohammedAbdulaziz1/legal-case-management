@@ -6,11 +6,13 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Pagination from '../../components/ui/Pagination'
-import { JUDGMENT_TYPES, JUDGMENT_LABELS } from '../../utils/constants'
+import { JUDGMENT_TYPES, JUDGMENT_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { useAuth } from '../../context/AuthContext'
 
 const PrimaryCases = () => {
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const [cases, setCases] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
@@ -209,9 +211,11 @@ const PrimaryCases = () => {
             إدارة وعرض جميع القضايا الابتدائية وتفاصيل الأحكام والإجراءات المرتبطة بها.
           </p>
         </div>
-        <Button icon="add" onClick={() => navigate('/cases/primary/new')}>
-          إضافة قضية جديدة
-        </Button>
+        {currentUser?.role !== USER_ROLES.VIEWER && (
+          <Button icon="add" onClick={() => navigate('/cases/primary/new')}>
+            إضافة قضية جديدة
+          </Button>
+        )}
       </div>
 
       {/* Filters & Toolbar */}
@@ -275,9 +279,11 @@ const PrimaryCases = () => {
           <div className="p-8 text-center">
             <span className="material-symbols-outlined text-slate-400 text-4xl mb-4">folder_open</span>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">لا توجد قضايا</p>
-            <Button variant="primary" icon="add" onClick={() => navigate('/cases/primary/new')}>
-              إضافة قضية جديدة
-            </Button>
+            {currentUser?.role !== USER_ROLES.VIEWER && (
+              <Button variant="primary" icon="add" onClick={() => navigate('/cases/primary/new')}>
+                إضافة قضية جديدة
+              </Button>
+            )}
           </div>
         ) : (
           <>
@@ -330,52 +336,58 @@ const PrimaryCases = () => {
                           </StatusBadge>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => navigate(`/cases/primary/${caseId}/edit`)}
-                              className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                              title="تعديل"
-                            >
-                              <span className="material-symbols-outlined text-[20px]">edit</span>
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (window.confirm('هل أنت متأكد من حذف هذه القضية؟')) {
-                                  try {
-                                    await caseService.deletePrimaryCase(caseId)
-                                    fetchCases()
-                                  } catch (err) {
-                                    alert('فشل في حذف القضية')
-                                  }
-                                }
-                              }}
-                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-                              title="حذف"
-                            >
-                              <span className="material-symbols-outlined text-[20px]">delete</span>
-                            </button>
-                            <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
-                            {canAppeal(judgment) ? (
-                              <Button
-                                size="sm"
-                                variant="primary"
-                                icon="gavel"
-                                onClick={() => navigate(`/cases/appeal/new?primary=${caseId}`)}
-                                className="text-xs"
-                              >
-                                استئناف
-                              </Button>
-                            ) : (
+                          {currentUser?.role !== USER_ROLES.VIEWER ? (
+                            <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                               <button
-                                disabled
-                                className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 rounded-md cursor-not-allowed border border-slate-200 dark:border-slate-700"
-                                title="لا يمكن الاستئناف قبل صدور الحكم"
+                                onClick={() => navigate(`/cases/primary/${caseId}/edit`)}
+                                className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                                title="تعديل"
                               >
-                                <span className="material-symbols-outlined text-[16px]">gavel</span>
-                                استئناف
+                                <span className="material-symbols-outlined text-[20px]">edit</span>
                               </button>
-                            )}
-                          </div>
+                              <button
+                                onClick={async () => {
+                                  if (window.confirm('هل أنت متأكد من حذف هذه القضية؟')) {
+                                    try {
+                                      await caseService.deletePrimaryCase(caseId)
+                                      fetchCases()
+                                    } catch (err) {
+                                      alert('فشل في حذف القضية')
+                                    }
+                                  }
+                                }}
+                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                                title="حذف"
+                              >
+                                <span className="material-symbols-outlined text-[20px]">delete</span>
+                              </button>
+                              <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                              {canAppeal(judgment) ? (
+                                <Button
+                                  size="sm"
+                                  variant="primary"
+                                  icon="gavel"
+                                  onClick={() => navigate(`/cases/appeal/new?primary=${caseId}`)}
+                                  className="text-xs"
+                                >
+                                  استئناف
+                                </Button>
+                              ) : (
+                                <button
+                                  disabled
+                                  className="flex items-center gap-1 px-3 py-1.5 text-xs font-bold text-slate-400 bg-slate-100 dark:bg-slate-800 dark:text-slate-600 rounded-md cursor-not-allowed border border-slate-200 dark:border-slate-700"
+                                  title="لا يمكن الاستئناف قبل صدور الحكم"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">gavel</span>
+                                  استئناف
+                                </button>
+                              )}
+                            </div>
+                          ) : (
+                            <div className="text-center text-slate-400 dark:text-slate-500 text-sm">
+                              عرض فقط
+                            </div>
+                          )}
                         </td>
                       </tr>
                     )

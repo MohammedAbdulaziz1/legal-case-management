@@ -63,6 +63,14 @@ class AppealController extends Controller
      */
     public function store(StoreAppealRequest $request): JsonResponse
     {
+        // Block viewers from creating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot create cases.',
+            ], 403);
+        }
+
         $appeal = Appeal::create($request->validated());
 
         // Log to archive
@@ -98,6 +106,14 @@ class AppealController extends Controller
      */
     public function update(UpdateAppealRequest $request, string $id): JsonResponse
     {
+        // Block viewers from updating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot update cases.',
+            ], 403);
+        }
+
         $appeal = Appeal::findOrFail($id);
         $oldData = $appeal->toArray();
 
@@ -121,8 +137,16 @@ class AppealController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
+        // Block viewers from deleting cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot delete cases.',
+            ], 403);
+        }
+
         $appeal = Appeal::findOrFail($id);
         $oldData = $appeal->toArray();
 

@@ -4,12 +4,14 @@ import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
-import { CASE_STATUSES, CASE_STATUS_LABELS } from '../../utils/constants'
+import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { useAuth } from '../../context/AuthContext'
 
 const SupremeCourtCaseDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [caseData, setCaseData] = useState(null)
@@ -112,9 +114,11 @@ const SupremeCourtCaseDetail = () => {
           <Button variant="secondary" icon="arrow_back" onClick={() => navigate('/cases/supreme')}>
             العودة للقائمة
           </Button>
-          <Button variant="primary" icon="edit" onClick={() => navigate(`/cases/supreme/${id}/edit`)}>
-            تعديل القضية
-          </Button>
+          {currentUser?.role !== USER_ROLES.VIEWER && (
+            <Button variant="primary" icon="edit" onClick={() => navigate(`/cases/supreme/${id}/edit`)}>
+              تعديل القضية
+            </Button>
+          )}
         </div>
       </div>
 

@@ -5,12 +5,14 @@ import Card from '../../components/common/Card'
 import Input from '../../components/common/Input'
 import Select from '../../components/common/Select'
 import Button from '../../components/common/Button'
-import { CASE_STATUSES, CASE_STATUS_LABELS } from '../../utils/constants'
+import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { useAuth } from '../../context/AuthContext'
 
 const AppealCaseEdit = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const isNew = id === 'new' || !id
   const [loading, setLoading] = useState(!isNew)
   const [formData, setFormData] = useState({
@@ -36,13 +38,26 @@ const AppealCaseEdit = () => {
   const [primaryCases, setPrimaryCases] = useState([])
   const [errors, setErrors] = useState({})
 
+  // Redirect viewers to detail page (defense in depth)
   useEffect(() => {
-    if (isNew) {
-      fetchPrimaryCases()
-    } else if (id) {
-      fetchCase()
+    if (currentUser?.role === USER_ROLES.VIEWER) {
+      if (isNew) {
+        navigate('/cases/appeal', { replace: true })
+      } else {
+        navigate(`/cases/appeal/${id}`, { replace: true })
+      }
     }
-  }, [id, isNew])
+  }, [currentUser, isNew, id, navigate])
+
+  useEffect(() => {
+    if (currentUser?.role !== USER_ROLES.VIEWER) {
+      if (isNew) {
+        fetchPrimaryCases()
+      } else if (id) {
+        fetchCase()
+      }
+    }
+  }, [id, isNew, currentUser])
 
   const fetchPrimaryCases = async () => {
     try {

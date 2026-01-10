@@ -1,10 +1,21 @@
 import { useAuth } from '../../context/AuthContext'
 import { useTheme } from '../../context/ThemeContext'
 import Avatar from '../ui/Avatar'
+import { USER_ROLES, USER_ROLE_LABELS } from '../../utils/constants'
 
 const Header = ({ breadcrumbs }) => {
   const { user, logout } = useAuth()
   const { isDark, toggleTheme } = useTheme()
+
+  // Helper function to get role label, mapping old roles (lawyer, trainee, clerk) to 'user'
+  const getRoleLabel = (role) => {
+    if (!role) return 'مستخدم'
+    // Map old roles to user
+    if (role === 'lawyer' || role === 'trainee' || role === 'clerk') {
+      return USER_ROLE_LABELS[USER_ROLES.USER] || 'مستخدم'
+    }
+    return USER_ROLE_LABELS[role] || role || 'مستخدم'
+  }
   
   return (
     <header className="bg-white dark:bg-[#1e2736] border-b border-slate-200 dark:border-slate-800 h-20 px-8 flex items-center justify-between sticky top-0 z-20 shadow-sm flex-shrink-0">
@@ -45,7 +56,7 @@ const Header = ({ breadcrumbs }) => {
         <div className="flex items-center gap-3 pr-4 border-r border-slate-200 dark:border-slate-700">
           <div className="text-left hidden sm:block">
             <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name || 'المستخدم'}</p>
-            <p className="text-xs text-slate-500 dark:text-slate-400">{user?.role || 'مستخدم'}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400">{getRoleLabel(user?.role)}</p>
           </div>
           <Avatar src={user?.avatar} name={user?.name} size="md" />
         </div>

@@ -132,6 +132,14 @@ class CaseRegistrationController extends Controller
      */
     public function store(StoreCaseRegistrationRequest $request): JsonResponse
     {
+        // Block viewers from creating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot create cases.',
+            ], 403);
+        }
+
         $case = CaseRegistration::create($request->validated());
 
         // Log to archive
@@ -167,6 +175,14 @@ class CaseRegistrationController extends Controller
      */
     public function update(UpdateCaseRegistrationRequest $request, string $id): JsonResponse
     {
+        // Block viewers from updating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot update cases.',
+            ], 403);
+        }
+
         $case = CaseRegistration::findOrFail($id);
         $oldData = $case->toArray();
 
@@ -190,8 +206,16 @@ class CaseRegistrationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
+        // Block viewers from deleting cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot delete cases.',
+            ], 403);
+        }
+
         $case = CaseRegistration::findOrFail($id);
         $oldData = $case->toArray();
 

@@ -58,6 +58,14 @@ class SupremeCourtController extends Controller
      */
     public function store(StoreSupremeCourtRequest $request): JsonResponse
     {
+        // Block viewers from creating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot create cases.',
+            ], 403);
+        }
+
         $case = SupremeCourt::create($request->validated());
 
         // Log to archive
@@ -93,6 +101,14 @@ class SupremeCourtController extends Controller
      */
     public function update(UpdateSupremeCourtRequest $request, string $id): JsonResponse
     {
+        // Block viewers from updating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot update cases.',
+            ], 403);
+        }
+
         $case = SupremeCourt::findOrFail($id);
         $oldData = $case->toArray();
 
@@ -116,8 +132,16 @@ class SupremeCourtController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
+        // Block viewers from deleting cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot delete cases.',
+            ], 403);
+        }
+
         $case = SupremeCourt::findOrFail($id);
         $oldData = $case->toArray();
 

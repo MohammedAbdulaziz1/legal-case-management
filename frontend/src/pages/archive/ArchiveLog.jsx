@@ -287,13 +287,20 @@ const ArchiveLog = () => {
   }
 
   const getUserRole = (entry) => {
+    const role = entry.user?.role
+    if (!role) return 'موظف'
+    
+    // Map old roles (lawyer, trainee, clerk) to 'user'
+    if (role === 'lawyer' || role === 'trainee' || role === 'clerk') {
+      return 'مستخدم'
+    }
+    
     const roleLabels = {
       'admin': 'مدير النظام',
-      'lawyer': 'محامي',
-      'trainee': 'محامي متدرب',
-      'clerk': 'أمين سر'
+      'user': 'مستخدم',
+      'viewer': 'مشاهد'
     }
-    return roleLabels[entry.user?.role] || 'موظف'
+    return roleLabels[role] || 'موظف'
   }
 
   const translateAction = (action) => {

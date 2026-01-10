@@ -36,15 +36,17 @@ export const JUDGMENT_LABELS = {
 
 export const USER_ROLES = {
   ADMIN: 'admin',
-  LAWYER: 'lawyer',
-  TRAINEE: 'trainee',
-  CLERK: 'clerk'
+  USER: 'user',
+  VIEWER: 'viewer'
 }
 
 export const USER_ROLE_LABELS = {
   [USER_ROLES.ADMIN]: 'مدير نظام',
-  [USER_ROLES.LAWYER]: 'محامي أول',
-  [USER_ROLES.TRAINEE]: 'محامي متدرب',
-  [USER_ROLES.CLERK]: 'كاتب عدل'
+  [USER_ROLES.USER]: 'مستخدم',
+  [USER_ROLES.VIEWER]: 'مشاهد',
+  // Map old roles to user for backward compatibility
+  'lawyer': 'مستخدم',
+  'trainee': 'مستخدم',
+  'clerk': 'مستخدم'
 }
 
