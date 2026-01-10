@@ -326,6 +326,7 @@ const PrimaryCases = () => {
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
                             {JUDGMENT_LABELS[judgment] || 'قيد المعالجة'}
+                            
                            
                           </StatusBadge>
                         </td>
@@ -360,7 +361,7 @@ const PrimaryCases = () => {
                                 size="sm"
                                 variant="primary"
                                 icon="gavel"
-                                onClick={() => navigate(`/cases/appeal/new?primary=${caseId}`)}
+                                onClick={() => navigate(`/cases/appeal/new?primary=${caseId}&judgment=${judgment}`)}
                                 className="text-xs"
                               >
                                 استئناف

@@ -10,6 +10,7 @@ use App\Models\Appeal;
 use App\Services\ArchiveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AppealController extends Controller
 {
@@ -45,7 +46,7 @@ class AppealController extends Controller
 
         $perPage = $request->get('per_page', 10);
         $appeals = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
+            
         return response()->json([
             'success' => true,
             'data' => AppealResource::collection($appeals->items()),
@@ -63,7 +64,9 @@ class AppealController extends Controller
      */
     public function store(StoreAppealRequest $request): JsonResponse
     {
+         Log::info($request);
         $appeal = Appeal::create($request->validated());
+       
 
         // Log to archive
         $this->archiveService->logCaseChange(
@@ -100,6 +103,7 @@ class AppealController extends Controller
     {
         $appeal = Appeal::findOrFail($id);
         $oldData = $appeal->toArray();
+        Log::info($oldData);
 
         $appeal->update($request->validated());
 
