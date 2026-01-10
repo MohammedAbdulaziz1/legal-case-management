@@ -20,15 +20,23 @@ const PrimaryCaseEdit = () => {
     registrationDate: '',
     sessionDate: '',
     title: '',
-    client: '',
-    opponent: '',
+    // client: '',
+    // opponent: '',
+    plaintiff: '',
+    plaintiffLawyer: '',
+    defendant:'',
+    defendantLawyer:'',
     court: '',
-    courtNumber: 1,
+    // courtNumber: 1,
+    cour:'',
     judge: '',
-    firstInstanceJudgment: 'قيد النظر',
+    firstInstanceJudgment: 'قيد المعالجة',
+    judgementdate:'',
+    judgementrecivedate:'',
     nextSessionDate: '',
-    status: CASE_STATUSES.ACTIVE,
-    notes: ''
+    // status: CASE_STATUSES.ACTIVE,
+    notes: '',
+    priority:'',
   })
 
   useEffect(() => {
@@ -53,7 +61,7 @@ const PrimaryCaseEdit = () => {
           court: caseData.court || '',
           courtNumber: caseData.courtNumber || 1,
           judge: caseData.judge || '',
-          firstInstanceJudgment: caseData.firstInstanceJudgment || 'قيد النظر',
+          firstInstanceJudgment: caseData.firstInstanceJudgment || 'قيد المعالجة',
           nextSessionDate: caseData.nextSessionDate || '',
           status: caseData.status || CASE_STATUSES.ACTIVE,
           notes: caseData.notes || ''
@@ -88,11 +96,12 @@ const PrimaryCaseEdit = () => {
     e.preventDefault()
     
     const validation = validateCaseForm(formData)
+    
     if (!validation.isValid) {
       setErrors(validation.errors)
-      return
+      return console.log(validation.errors);
     }
-
+  
     setErrors({})
     try {
       if (isNew) {
@@ -175,8 +184,22 @@ const PrimaryCaseEdit = () => {
               }
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div className="md:col-span-2">
+                  <Input
+                    label="عنوان القضية"
+                    value={formData.title}
+                    onChange={(e) => {
+                      handleChange('title', e.target.value)
+                      if (errors.title) setErrors(prev => ({ ...prev, title: '' }))
+                    }}
+                    placeholder="أدخل عنوان القضية"
+                    error={errors.title}
+                    
+                  />
+                </div>
                 <Input
-                  label="رقم القضية"
+                  label="رقم الدعوى"
+                  type='number'
                   value={formData.caseNumber}
                   onChange={(e) => {
                     handleChange('caseNumber', e.target.value)
@@ -188,7 +211,7 @@ const PrimaryCaseEdit = () => {
                   required={isNew}
                 />
                 <Input
-                  label="تاريخ التسجيل"
+                  label="تاريخ الدعوى"
                   type="date"
                   value={formData.registrationDate}
                   onChange={(e) => handleChange('registrationDate', e.target.value)}
@@ -205,20 +228,8 @@ const PrimaryCaseEdit = () => {
                   error={errors.sessionDate}
                   required
                 />
-                <div className="md:col-span-2">
-                  <Input
-                    label="عنوان القضية"
-                    value={formData.title}
-                    onChange={(e) => {
-                      handleChange('title', e.target.value)
-                      if (errors.title) setErrors(prev => ({ ...prev, title: '' }))
-                    }}
-                    placeholder="أدخل عنوان القضية"
-                    error={errors.title}
-                    required
-                  />
-                </div>
-                <Input
+               
+                {/* <Input
                   label="اسم الموكل"
                   value={formData.client}
                   onChange={(e) => {
@@ -228,8 +239,8 @@ const PrimaryCaseEdit = () => {
                   icon="person"
                   error={errors.client}
                   required
-                />
-                <Input
+                /> */}
+                {/* <Input
                   label="اسم الخصم"
                   value={formData.opponent}
                   onChange={(e) => {
@@ -239,14 +250,41 @@ const PrimaryCaseEdit = () => {
                   icon="person_cancel"
                   error={errors.opponent}
                   required
+                /> */}
+              </div>
+            </Card>
+                <Card title="أطراف القضية" icon="groups">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Input
+                  label="اسم المدعي"
+                  value={formData.plaintiff}
+                  onChange={(e) => handleChange('plaintiff', e.target.value)}
+                  icon="person"
+                />
+                <Input
+                  label="المحامي الوكيل (المدعي)"
+                  value={formData.plaintiffLawyer}
+                  onChange={(e) => handleChange('plaintiffLawyer', e.target.value)}
+                />
+                <Input
+                  label="اسم المدعى عليه"
+                  value={formData.defendant}
+                  onChange={(e) => handleChange('defendant', e.target.value)}
+                  icon="person_off"
+                />
+                <Input
+                  label="المحامي الوكيل (المدعى عليه)"
+                  value={formData.defendantLawyer}
+                  onChange={(e) => handleChange('defendantLawyer', e.target.value)}
+                  placeholder="-- غير محدد --"
                 />
               </div>
             </Card>
 
             <Card title="تفاصيل المحكمة والجلسات" icon="gavel">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <Select
-                  label="الدائرة القضائية"
+                {/* <Select
+                  label="المحكمة"
                   value={formData.court}
                   onChange={(e) => handleChange('court', e.target.value)}
                   options={[
@@ -254,18 +292,13 @@ const PrimaryCaseEdit = () => {
                     { value: 'المحكمة الابتدائية التجارية - جدة', label: 'المحكمة الابتدائية التجارية - جدة' },
                     { value: 'المحكمة الابتدائية - الدائرة الثالثة', label: 'المحكمة الابتدائية - الدائرة الثالثة' }
                   ]}
-                />
+                /> */}
+                
                 <Input
-                  label="رقم الدائرة القضائية"
-                  type="number"
-                  value={formData.courtNumber}
-                  onChange={(e) => {
-                    handleChange('courtNumber', parseInt(e.target.value) || 1)
-                    if (errors.courtNumber) setErrors(prev => ({ ...prev, courtNumber: '' }))
-                  }}
-                  error={errors.courtNumber}
+                  label="المحكمة"
+                  value={formData.court}
+                  onChange={(e) => handleChange('court', e.target.value)}
                   required
-                  min="1"
                 />
                 <Input
                   label="اسم القاضي"
@@ -282,27 +315,41 @@ const PrimaryCaseEdit = () => {
                   error={errors.firstInstanceJudgment}
                   required
                   options={[
-                    { value: 'قيد النظر', label: 'قيد النظر' },
-                    { value: 'للمدعي', label: 'للمدعي' },
-                    { value: 'ضد المدعي', label: 'ضد المدعي' },
-                    { value: 'تم الحكم', label: 'تم الحكم' }
+                    { value: 'الغاء القرار', label: 'الغاء القرار' },
+                    { value: 'رفض الدعوة', label: 'رفض الدعوة' },
+                    { value: 'تاجيل', label: 'تاجيل' },
+                    { value: 'قيد المعالجة', label: 'قيدالمعالجة' }
                   ]}
                 />
+                 <Input
+                  label="تاريخ الحكم"
+                  type="date"
+                  value={formData.judgementdate}
+                  onChange={(e) => {
+                    handleChange('judgementdate', e.target.value)
+                    if (errors.judgementdate) setErrors(prev => ({ ...prev, judgementdate: '' }))
+                  }}
+                  error={errors.judgementdate}
+                 
+                />
                 <Input
+                  label="تاريخ استلام الحكم"
+                  type="date"
+                  value={formData.judgementrecivedate}
+                  onChange={(e) => {
+                    handleChange('judgementrecivedate', e.target.value)
+                    if (errors.judgementrecivedate) setErrors(prev => ({ ...prev, judgementrecivedate: '' }))
+                  }}
+                  error={errors.judgementrecivedate}
+                  
+                />
+                {/* <Input
                   label="تاريخ الجلسة القادمة"
                   type="date"
                   value={formData.nextSessionDate}
                   onChange={(e) => handleChange('nextSessionDate', e.target.value)}
-                />
-                <Select
-                  label="حالة القضية"
-                  value={formData.status}
-                  onChange={(e) => handleChange('status', e.target.value)}
-                  options={Object.entries(CASE_STATUSES).map(([key, value]) => ({
-                    value,
-                    label: CASE_STATUS_LABELS[value]
-                  }))}
-                />
+                /> */}
+              
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
                     ملاحظات ووقائع
@@ -357,6 +404,53 @@ const PrimaryCaseEdit = () => {
                     <span className="material-symbols-outlined text-lg">delete</span>
                   </button>
                 </div>
+              </div>
+            </Card>
+
+             <Card className="p-6 sticky top-6">
+              <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
+              {/* <div className="flex flex-col gap-2 mb-4">
+                <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
+                <Select
+                  value={formData.status}
+                  onChange={(e) => handleChange('status', e.target.value)}
+                  options={Object.entries(CASE_STATUSES).map(([key, value]) => ({
+                    value,
+                    label: CASE_STATUS_LABELS[value]
+                  }))}
+                />
+              </div> */}
+              <div className="flex flex-col gap-2 mb-4">
+                <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
+                <div className="flex items-center gap-3">
+                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors flex-1">
+                    <input
+                      type="radio"
+                      name="priority"
+                      value="normal"
+                      checked={formData.priority === 'normal'}
+                      onChange={(e) => handleChange('priority', e.target.value)}
+                      className="text-primary focus:ring-primary"
+                    />
+                    <span className="text-sm">عادية</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900 flex-1">
+                    <input
+                      type="radio"
+                      name="priority"
+                      value="urgent"
+                      checked={formData.priority === 'urgent'}
+                      onChange={(e) => handleChange('priority', e.target.value)}
+                      className="text-red-500 focus:ring-red-500"
+                    />
+                    <span className="text-sm font-bold text-red-600 dark:text-red-400">مستعجلة</span>
+                  </label>
+                </div>
+              </div>
+              <div className="border-t border-slate-200 dark:border-slate-700 my-4"></div>
+              <div className="flex flex-col gap-3">
+               
+               
               </div>
             </Card>
           </div>
