@@ -15,16 +15,24 @@ export const CASE_STATUS_LABELS = {
 }
 
 export const JUDGMENT_TYPES = {
-  FOR_PLAINTIFF: 1,
-  AGAINST_PLAINTIFF: 2,
+  CANCELED: 1,
+  REJECTED: 2,
+  POSTPONED:3,
   PENDING: null
 }
 
 export const JUDGMENT_LABELS = {
-  [JUDGMENT_TYPES.FOR_PLAINTIFF]: 'لصالح المدعي',
-  [JUDGMENT_TYPES.AGAINST_PLAINTIFF]: 'ضد المدعي',
-  [JUDGMENT_TYPES.PENDING]: 'قيد النظر'
+  [JUDGMENT_TYPES.CANCELED]: 'الغاء القرار',
+  [JUDGMENT_TYPES.REJECTED]: 'رفض الدعوة',
+  [JUDGMENT_TYPES.POSTPONED]: 'تاجيل الدعوة',
+  [JUDGMENT_TYPES.PENDING]: 'قيد المعالجة'
 }
+
+// export const JUDGMENT_LABELS = {
+//   [JUDGMENT_TYPES.FOR_PLAINTIFF]: 'لصالح المدعي',
+//   [JUDGMENT_TYPES.AGAINST_PLAINTIFF]: 'ضد المدعي',
+//   [JUDGMENT_TYPES.PENDING]: 'قيد النظر'
+// }
 
 export const USER_ROLES = {
   ADMIN: 'admin',
