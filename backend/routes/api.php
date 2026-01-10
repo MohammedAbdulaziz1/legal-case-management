@@ -20,6 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 
     // Primary Cases
+    Route::get('/cases/primary/export', [CaseRegistrationController::class, 'export']);
     Route::apiResource('cases/primary', CaseRegistrationController::class);
 
     // Appeal Cases

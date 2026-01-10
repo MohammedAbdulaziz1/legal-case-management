@@ -6,6 +6,10 @@ export const caseService = {
     return api.get('/cases/primary', { params })
   },
 
+  exportPrimaryCases: async (params = {}) => {
+    return api.get('/cases/primary/export', { params, responseType: 'blob' })
+  },
+
   getPrimaryCase: async (id) => {
     return api.get(`/cases/primary/${id}`)
   },

@@ -22,13 +22,13 @@ export const validateCaseForm = (formData) => {
     errors.title = 'عنوان القضية مطلوب'
   }
 
-  if (!validateRequired(formData.client)) {
-    errors.client = 'اسم الموكل مطلوب'
-  }
+  // if (!validateRequired(formData.client)) {
+  //   errors.client = 'اسم الموكل مطلوب'
+  // }
 
-  if (!validateRequired(formData.opponent)) {
-    errors.opponent = 'اسم الخصم مطلوب'
-  }
+  // if (!validateRequired(formData.opponent)) {
+  //   errors.opponent = 'اسم الخصم مطلوب'
+  // }
 
   if (!validateRequired(formData.registrationDate)) {
     errors.registrationDate = 'تاريخ التسجيل مطلوب'
@@ -38,9 +38,9 @@ export const validateCaseForm = (formData) => {
     errors.sessionDate = 'تاريخ الجلسة مطلوب'
   }
 
-  if (!formData.courtNumber || formData.courtNumber < 1) {
-    errors.courtNumber = 'رقم الدائرة القضائية مطلوب'
-  }
+  // if (!formData.courtNumber || formData.courtNumber < 1) {
+  //   errors.courtNumber = 'رقم الدائرة القضائية مطلوب'
+  // }
 
   if (!validateRequired(formData.firstInstanceJudgment)) {
     errors.firstInstanceJudgment = 'حكم المحكمة الابتدائية مطلوب'
