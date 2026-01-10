@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\ArchiveController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CaseRegistrationController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\SupremeCourtController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
@@ -42,4 +43,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+
+    // Documents
+    Route::apiResource('documents', DocumentController::class);
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
 });

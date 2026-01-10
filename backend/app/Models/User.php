@@ -63,4 +63,12 @@ class User extends Authenticatable
     {
         return $this->hasMany(ArchiveLog::class);
     }
+
+    /**
+     * Get the documents uploaded by the user.
+     */
+    public function documents()
+    {
+        return $this->hasMany(Document::class, 'uploaded_by');
+    }
 }
