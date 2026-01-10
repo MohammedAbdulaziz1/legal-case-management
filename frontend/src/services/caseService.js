@@ -75,6 +75,9 @@ export const caseService = {
       appeal_court_number: parseInt(data.courtNumber) || 1,
       appeal_judgment: data.appealJudgment || data.judgment || 'قيد النظر',
       appealed_by: data.appealedBy || '',
+      sessionDate: data.sessionDate || '',
+      judgementdate: data.judgementdate,
+      judgementrecivedate: data.judgementrecivedate,
       assigned_case_registration_request_id: parseInt(data.caseRegistrationId) || parseInt(data.assignedCaseRegistrationRequestId) || null,
       status: data.status || 'active',
       priority: data.priority || 'normal',
@@ -86,6 +89,7 @@ export const caseService = {
       subject: data.subject || '',
       judge: data.judge || '',
     }
+    console.log(backendData);
     return api.post('/cases/appeal', backendData)
   },
 
@@ -96,6 +100,9 @@ export const caseService = {
       appeal_court_number: data.courtNumber ? parseInt(data.courtNumber) : undefined,
       appeal_judgment: data.appealJudgment || data.judgment,
       appealed_by: data.appealedBy,
+      sessionDate: data.sessionDate || '',
+      judgementdate: data.judgementdate || '',
+      judgementrecivedate: data.judgementrecivedate || '',
       status: data.status,
       priority: data.priority,
       notes: data.notes,
@@ -106,6 +113,8 @@ export const caseService = {
       subject: data.subject,
       judge: data.judge,
     }
+        console.log(backendData);
+
     // Remove undefined values
     Object.keys(backendData).forEach(key => {
       if (backendData[key] === undefined) delete backendData[key]

@@ -1,3 +1,16 @@
+export const APPEALED_PARTIES = {
+  TGA:1 ,
+  COMPANY: 2
+  
+}
+
+
+export const APPEALED_PARTIES_LABLES = {
+  [APPEALED_PARTIES.COMPANY]: 'الشركة',
+  [APPEALED_PARTIES.TGA]: 'هيئة النقل'
+  
+}
+
 export const CASE_STATUSES = {
   ACTIVE: 'active',
   PENDING: 'pending',

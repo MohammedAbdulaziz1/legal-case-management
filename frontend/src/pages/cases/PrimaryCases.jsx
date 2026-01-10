@@ -332,6 +332,7 @@ const PrimaryCases = () => {
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
                             {JUDGMENT_LABELS[judgment] || 'قيد المعالجة'}
+                            
                            
                           </StatusBadge>
                         </td>

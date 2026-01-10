@@ -21,7 +21,8 @@ const AppealCaseEdit = () => {
     courtNumber: 1,
     appealJudgment: 'قيد المعالجة',
     judgementdate: '',
-    judgementrecivedate:'',
+    judgementrecivedate: '',
+    sessionDate: '',
     appealedBy: '',
     caseRegistrationId: '',
     court: '',
@@ -67,8 +68,12 @@ const AppealCaseEdit = () => {
         // Check if there's a primary case ID in query params
         const urlParams = new URLSearchParams(window.location.search)
         const primaryId = urlParams.get('primary')
+        const judgment = urlParams.get('judgment')
         if (primaryId) {
           setFormData(prev => ({ ...prev, caseRegistrationId: primaryId }))
+        }
+         if (judgment) {
+          setFormData(prev => ({ ...prev, appealedBy: APPEALED_PARTIES_LABLES[judgment] }))
         }
       }
     } catch (err) {
@@ -291,27 +296,38 @@ const AppealCaseEdit = () => {
                   required
                   placeholder="من قام بالاستئناف"
                 />
+              <Input
+                  label="تاريخ الجلسة"
+                  type="date"
+                  value={formData.sessionDate}
+                  onChange={(e) => {
+                    handleChange('sessionDate', e.target.value)
+                    if (errors.sessionDate) setErrors(prev => ({ ...prev, sessionDate: '' }))
+                  }}
+                  error={errors.sessionDate}
+                  required
+                />
                  <Input
                   label="تاريخ الحكم"
                   type="date"
                   value={formData.judgementdate}
                   onChange={(e) => {
-                    handleChange('registrationDate', e.target.value)
-                    if (errors.registrationDate) setErrors(prev => ({ ...prev, registrationDate: '' }))
+                    handleChange('judgementdate', e.target.value)
+                    if (errors.judgementdate) setErrors(prev => ({ ...prev, judgementdate: '' }))
                   }}
-                  error={errors.registrationDate}
+                  error={errors.judgementdate}
                   required
                 />
                 
                  <Input
                   label="تاريخ استلام الحكم"
                   type="date"
-                  value={formData.judgementdate}
+                  value={formData.judgementrecivedate}
                   onChange={(e) => {
-                    handleChange('registrationDate', e.target.value)
-                    if (errors.registrationDate) setErrors(prev => ({ ...prev, registrationDate: '' }))
+                    handleChange('judgementrecivedate', e.target.value)
+                    if (errors.judgementrecivedate) setErrors(prev => ({ ...prev, judgementrecivedate: '' }))
                   }}
-                  error={errors.registrationDate}
+                  error={errors.judgementrecivedate}
                   required
                 />
                 
