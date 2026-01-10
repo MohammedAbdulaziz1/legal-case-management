@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\SupremeCourtController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
+// smiple comment
 // Public routes
 Route::post('/auth/login', [AuthController::class, 'login']);
 
