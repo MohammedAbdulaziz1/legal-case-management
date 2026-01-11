@@ -11,6 +11,8 @@ use App\Services\PermissionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
 
 class UserController extends Controller
 {
@@ -26,7 +28,7 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        // Only admins can list users
+       // Only admins can list users
         if ($request->user()->role !== 'admin') {
             return response()->json([
                 'success' => false,
