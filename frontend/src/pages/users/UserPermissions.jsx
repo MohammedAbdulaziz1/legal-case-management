@@ -83,6 +83,17 @@ const UserPermissions = () => {
     const newRole = e.target.value
     if (!selectedUserId || !newRole) return
     
+    // Prevent admin from changing their own role
+    if (currentUser?.id === selectedUserId && currentUser?.role === USER_ROLES.ADMIN) {
+      alert('لا يمكنك تغيير دورك الخاص. يرجى استخدام مستخدم إداري آخر لتغيير هذا الدور.')
+      // Revert to original role
+      const normalizedRole = (selectedUser?.role === 'lawyer' || selectedUser?.role === 'trainee' || selectedUser?.role === 'clerk') 
+        ? USER_ROLES.USER 
+        : selectedUser?.role
+      setRole(normalizedRole || USER_ROLES.USER)
+      return
+    }
+    
     // Update local state immediately for better UX
     setRole(newRole)
     
@@ -368,12 +379,17 @@ const UserPermissions = () => {
                 label="الدور الوظيفي"
                 value={role}
                 onChange={handleRoleChange}
-                disabled={!selectedUserId || saving}
+                disabled={!selectedUserId || saving || (currentUser?.id === selectedUserId && currentUser?.role === USER_ROLES.ADMIN)}
                 options={Object.entries(USER_ROLES).map(([key, value]) => ({
                   value,
                   label: USER_ROLE_LABELS[value]
                 }))}
               />
+              {currentUser?.id === selectedUserId && currentUser?.role === USER_ROLES.ADMIN && (
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  لا يمكنك تغيير دورك الخاص. يرجى استخدام مستخدم إداري آخر لتغيير هذا الدور.
+                </p>
+              )}
             </div>
 
             <div className="p-6 overflow-y-auto flex-1">
