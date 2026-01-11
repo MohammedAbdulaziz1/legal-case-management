@@ -5,7 +5,7 @@ import Card from '../../components/common/Card'
 import Input from '../../components/common/Input'
 import Select from '../../components/common/Select'
 import Button from '../../components/common/Button'
-import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
+import { APPEALED_PARTIES_LABLES, CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
 
@@ -22,6 +22,7 @@ const SupremeCourtCaseEdit = () => {
     supremeCourtJudgment: '',
     judgementdate: '',
     judgementrecivedate: '',
+    appealedBy: '',
     appealId: '',
     court: '',
     judge: '',
@@ -99,6 +100,7 @@ const SupremeCourtCaseEdit = () => {
           supremeCourtJudgment: caseData.supremeCourtJudgment || '',
           judgementdate: normalizeDateInputValue(caseData.judgementdate),
           judgementrecivedate: normalizeDateInputValue(caseData.judgementrecivedate),
+          appealedBy: caseData.appealedBy || caseData.appealed_by || '',
           appealId: caseData.appealId?.toString() || caseData.appealRequestId?.toString() || '',
           court: caseData.court || 'المحكمة العليا - الرياض',
           judge: caseData.judge || '',
@@ -149,6 +151,7 @@ const SupremeCourtCaseEdit = () => {
     if (!formData.sessionDate) validationErrors.sessionDate = 'تاريخ الجلسة مطلوب'
     if (!formData.judgementdate) validationErrors.judgementdate = 'تاريخ الحكم مطلوب'
     if (!formData.judgementrecivedate) validationErrors.judgementrecivedate = 'تاريخ استلام الحكم مطلوب'
+    if (!formData.appealedBy) validationErrors.appealedBy = 'من قام بالرفع مطلوب'
     if (isNew && !formData.appealId) validationErrors.appealId = 'قضية الاستئناف مطلوبة'
     
     if (Object.keys(validationErrors).length > 0) {
@@ -175,6 +178,7 @@ const SupremeCourtCaseEdit = () => {
           const frontendKey = key === 'supreme_case_number' ? 'caseNumber' :
                              key === 'supreme_date' ? 'registrationDate' :
                              key === 'appeal_request_id' ? 'appealId' :
+                             key === 'appealed_by' ? 'appealedBy' :
                              key === 'plaintiff_lawyer' ? 'plaintiffLawyer' :
                              key === 'defendant_lawyer' ? 'defendantLawyer' : key
           formattedErrors[frontendKey] = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key]
@@ -262,6 +266,21 @@ const SupremeCourtCaseEdit = () => {
                   error={errors.registrationDate}
                   required
                 />
+                <Select
+                  label="من قام بالرفع للمحكمة العليا"
+                  value={formData.appealedBy}
+                  onChange={(e) => {
+                    handleChange('appealedBy', e.target.value)
+                    if (errors.appealedBy) setErrors(prev => ({ ...prev, appealedBy: '' }))
+                  }}
+                  error={errors.appealedBy}
+                  required
+                  options={[
+                    { value: '', label: 'اختر الجهة' },
+                    { value: APPEALED_PARTIES_LABLES[1], label: APPEALED_PARTIES_LABLES[1] },
+                    { value: APPEALED_PARTIES_LABLES[2], label: APPEALED_PARTIES_LABLES[2] },
+                  ]}
+                />
                  <Input
                   label="تاريخ الجلسة"
                   type="date"
@@ -277,6 +296,7 @@ const SupremeCourtCaseEdit = () => {
                   label=" حكم  العليا"
                   value={formData.supremeCourtJudgment}
                   onChange={(e) => handleChange('supremeCourtJudgment', e.target.value)}
+                  required
                 />
                  <Input
                   label="تاريخ الحكم"
@@ -305,11 +325,13 @@ const SupremeCourtCaseEdit = () => {
                   label="المحكمة العليا"
                   value={formData.court}
                   onChange={(e) => handleChange('court', e.target.value)}
+                  required
                 />
                 <Input
                   label="اسم القاضي"
                   value={formData.judge}
                   onChange={(e) => handleChange('judge', e.target.value)}
+                  required
                 />
               </div>
             </Card>

@@ -16,6 +16,7 @@ class SupremeCourt extends Model
         'supreme_date',
         'supreme_case_number',
         'appeal_request_id',
+        'appealed_by',
         'sessionDate',
         'supremeCourtJudgment',
         'judgementdate',

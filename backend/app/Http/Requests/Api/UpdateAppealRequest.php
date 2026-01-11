@@ -17,7 +17,7 @@ class UpdateAppealRequest extends FormRequest
             'appeal_number' => ['sometimes', 'integer'],
             'appeal_date' => ['sometimes', 'date'],
             'sessionDate' => ['required', 'date'],
-            'judgementdate: ' => ['required', 'date'],
+            'judgementdate' => ['required', 'date'],
             'judgementrecivedate' => ['required', 'date'],
             'appeal_court_number' => ['sometimes', 'integer'],
             'appeal_judgment' => ['sometimes', 'string', 'max:255'],

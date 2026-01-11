@@ -17,6 +17,7 @@ class StoreSupremeCourtRequest extends FormRequest
             'supreme_date' => ['required', 'date'],
             'supreme_case_number' => ['required', 'integer'],
             'appeal_request_id' => ['required', 'exists:appeal,appeal_request_id'],
+            'appealed_by' => ['required', 'string', 'max:255'],
             'sessionDate' => ['required', 'date'],
             'supremeCourtJudgment' => ['nullable', 'string', 'max:255'],
             'judgementdate' => ['required', 'date'],

@@ -22,6 +22,7 @@ class SupremeCourtResource extends JsonResource
             'supremeCourtJudgment' => $this->supremeCourtJudgment,
             'judgementdate' => $this->judgementdate?->format('Y-m-d'),
             'judgementrecivedate' => $this->judgementrecivedate?->format('Y-m-d'),
+            'appealedBy' => $this->appealed_by,
             'status' => $this->status,
             'priority' => $this->priority,
             'notes' => $this->notes,

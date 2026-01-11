@@ -5,7 +5,7 @@ import Card from '../../components/common/Card'
 import Input from '../../components/common/Input'
 import Select from '../../components/common/Select'
 import Button from '../../components/common/Button'
-import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
+import { APPEALED_PARTIES_LABLES, CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
 
@@ -160,6 +160,9 @@ const AppealCaseEdit = () => {
     if (!formData.courtNumber || formData.courtNumber < 1) validationErrors.courtNumber = 'رقم الدائرة القضائية مطلوب'
     if (!formData.appealJudgment) validationErrors.appealJudgment = 'حكم الاستئناف مطلوب'
     if (!formData.appealedBy) validationErrors.appealedBy = 'المستأنف مطلوب'
+    if (!formData.sessionDate) validationErrors.sessionDate = 'تاريخ الجلسة مطلوب'
+    if (!formData.judgementdate) validationErrors.judgementdate = 'تاريخ الحكم مطلوب'
+    if (!formData.judgementrecivedate) validationErrors.judgementrecivedate = 'تاريخ استلام الحكم مطلوب'
     if (isNew && !formData.caseRegistrationId) validationErrors.caseRegistrationId = 'القضية الابتدائية مطلوبة'
     
     if (Object.keys(validationErrors).length > 0) {

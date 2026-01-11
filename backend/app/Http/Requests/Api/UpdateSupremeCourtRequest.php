@@ -16,6 +16,7 @@ class UpdateSupremeCourtRequest extends FormRequest
         return [
             'supreme_date' => ['sometimes', 'date'],
             'supreme_case_number' => ['sometimes', 'integer'],
+            'appealed_by' => ['sometimes', 'string', 'max:255'],
             'sessionDate' => ['sometimes', 'date'],
             'supremeCourtJudgment' => ['nullable', 'string', 'max:255'],
             'judgementdate' => ['sometimes', 'date'],
