@@ -141,13 +141,16 @@ const AppealCases = () => {
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من المستأنف</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap"> حكم الاستئناف</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الحالة</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {cases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.appealRequestId
+                    const appealJudgment = (caseItem.appealJudgment || '').toString().trim()
+                    const canTransferToSupremeCourt =
+                      appealJudgment === 'بتأييد الحكم' ||
+                      appealJudgment === 'الغاء الحكم'
                     return (
                       <tr 
                         key={caseId} 
@@ -161,14 +164,28 @@ const AppealCases = () => {
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.appealJudgment || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.sessionDate || caseItem.sessionDate)}</td>
-                        <td className="px-6 py-4 text-center">
-                          <StatusBadge status={caseItem.status || 'active'}>
-                            {caseItem.status === 'active' ? 'قيد النظر' : caseItem.status === 'pending' ? 'معلقة' : caseItem.status}
-                          </StatusBadge>
-                        </td>
                         <td className="px-6 py-4">
                           {currentUser?.role !== USER_ROLES.VIEWER ? (
                             <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => {
+                                  if (!canTransferToSupremeCourt) return
+                                  navigate(`/cases/supreme/new?appeal=${caseId}`)
+                                }}
+                                disabled={!canTransferToSupremeCourt}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  canTransferToSupremeCourt
+                                    ? 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
+                                    : 'text-slate-300 dark:text-slate-600 cursor-not-allowed opacity-60'
+                                }`}
+                                title={
+                                  canTransferToSupremeCourt
+                                    ? 'تحويل إلى المحكمة العليا'
+                                    : 'لا يمكن تحويل القضية إلى المحكمة العليا إلا بعد صدور حكم الاستئناف (بتأييد الحكم أو الغاء الحكم)'
+                                }
+                              >
+                                <span className="material-symbols-outlined text-[20px]">gavel</span>
+                              </button>
                               <button
                                 onClick={() => navigate(`/cases/appeal/${caseId}/edit`)}
                                 className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"

@@ -56,6 +56,12 @@ const SupremeCourtCaseEdit = () => {
       const response = await caseService.getAppealCases({ per_page: 100 })
       if (response.data.success) {
         setAppealCases(response.data.data || [])
+
+        const urlParams = new URLSearchParams(window.location.search)
+        const appealId = urlParams.get('appeal')
+        if (appealId) {
+          setFormData(prev => ({ ...prev, appealId }))
+        }
       }
     } catch (err) {
       console.error('Error fetching appeal cases:', err)
