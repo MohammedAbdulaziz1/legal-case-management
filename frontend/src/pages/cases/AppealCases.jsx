@@ -136,11 +136,12 @@ const AppealCases = () => {
               <table className="w-full text-sm text-right">
                 <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                   <tr>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم الاستئناف</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الاستئناف</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من المستأنف</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap"> حكم الاستئناف</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم القضية</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">المدعي</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">المدعى عليه</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">موضوع القضية</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ التسجيل</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الحالة</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
                   </tr>
                 </thead>
@@ -160,10 +161,15 @@ const AppealCases = () => {
                         <td className="px-6 py-4 font-medium text-primary whitespace-nowrap hover:underline">
                           {caseItem.appealNumber || caseId}
                         </td>
-                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.registrationDate || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.appealJudgment || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.sessionDate || caseItem.sessionDate)}</td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.plaintiff || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.defendant || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.subject || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.appealDate || caseItem.registrationDate)}</td>
+                        <td className="px-6 py-4 text-center">
+                          <StatusBadge status={caseItem.status || 'active'}>
+                            {caseItem.status === 'active' ? 'قيد النظر' : caseItem.status === 'pending' ? 'معلقة' : caseItem.status}
+                          </StatusBadge>
+                        </td>
                         <td className="px-6 py-4">
                           {currentUser?.role !== USER_ROLES.VIEWER ? (
                             <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>

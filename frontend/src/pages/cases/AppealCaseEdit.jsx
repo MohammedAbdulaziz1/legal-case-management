@@ -23,6 +23,10 @@ const AppealCaseEdit = () => {
     judgementdate: '',
     judgementrecivedate: '',
     sessionDate: '',
+    appealJudgment: 'قيد المعالجة',
+    judgementdate: '',
+    judgementrecivedate: '',
+    sessionDate: '',
     appealedBy: '',
     caseRegistrationId: '',
     court: '',
@@ -82,8 +86,12 @@ const AppealCaseEdit = () => {
         const urlParams = new URLSearchParams(window.location.search)
         const primaryId = urlParams.get('primary')
         const judgment = urlParams.get('judgment')
+        const judgment = urlParams.get('judgment')
         if (primaryId) {
           setFormData(prev => ({ ...prev, caseRegistrationId: primaryId }))
+        }
+         if (judgment) {
+          setFormData(prev => ({ ...prev, appealedBy: APPEALED_PARTIES_LABLES[judgment] }))
         }
          if (judgment) {
           setFormData(prev => ({ ...prev, appealedBy: APPEALED_PARTIES_LABLES[judgment] }))
@@ -101,11 +109,15 @@ const AppealCaseEdit = () => {
       if (response.data.success) {
         const caseData = response.data.data
 
+
         setFormData({
           caseNumber: caseData.caseNumber?.toString() || '',
           registrationDate: caseData.registrationDate || caseData.appealDate || '',
           courtNumber: caseData.courtNumber || 1,
           appealJudgment: caseData.appealJudgment || 'قيد النظر',
+          sessionDate:caseData.sessionDate || '',
+          judgementdate: normalizeDateInputValue(caseData.judgementdate),
+          judgementrecivedate: normalizeDateInputValue(caseData.judgementrecivedate),
           sessionDate:caseData.sessionDate || '',
           judgementdate: normalizeDateInputValue(caseData.judgementdate),
           judgementrecivedate: normalizeDateInputValue(caseData.judgementrecivedate),
@@ -257,6 +269,7 @@ const AppealCaseEdit = () => {
                 )}
                 <Input
                   label="رقم الاستئناف"
+                  label="رقم الاستئناف"
                   value={formData.caseNumber}
                   onChange={(e) => {
                     handleChange('caseNumber', e.target.value)
@@ -268,6 +281,7 @@ const AppealCaseEdit = () => {
                 />
                 <Input
                   label="تاريخ الحكم المستانف"
+                  label="تاريخ الحكم المستانف"
                   type="date"
                   value={formData.registrationDate}
                   onChange={(e) => {
@@ -277,6 +291,7 @@ const AppealCaseEdit = () => {
                   error={errors.registrationDate}
                   required
                 />
+                {/* <Input
                 {/* <Input
                   label="رقم الدائرة القضائية"
                   type="number"
@@ -288,6 +303,7 @@ const AppealCaseEdit = () => {
                   error={errors.courtNumber}
                   required
                   min="1"
+                /> */}
                 /> */}
                 <Select
                   label="حكم الاستئناف"
@@ -303,8 +319,13 @@ const AppealCaseEdit = () => {
                     { value: 'بتأييد الحكم', label: 'بتأييد الحكم' },
                     { value: 'الغاء الحكم', label: 'الغاء الحكم' },
                     
+                    {value: 'قيد المعالجة' , label: 'قيد المعالجة'} ,                 
+                    { value: 'بتأييد الحكم', label: 'بتأييد الحكم' },
+                    { value: 'الغاء الحكم', label: 'الغاء الحكم' },
+                    
                   ]}
                 />
+                  <Input
                   <Input
                   label="المستأنف"
                   value={formData.appealedBy}
@@ -354,12 +375,56 @@ const AppealCaseEdit = () => {
               
                 {/* <Select
                   label="المحكمة"
+              <Input
+                  label="تاريخ الجلسة"
+                  type="date"
+                  value={formData.sessionDate}
+                  onChange={(e) => {
+                    handleChange('sessionDate', e.target.value)
+                    if (errors.sessionDate) setErrors(prev => ({ ...prev, sessionDate: '' }))
+                  }}
+                  error={errors.sessionDate}
+                  required
+                />
+                 <Input
+                  label="تاريخ الحكم"
+                  type="date"
+                  value={formData.judgementdate}
+                  onChange={(e) => {
+                    handleChange('judgementdate', e.target.value)
+                    if (errors.judgementdate) setErrors(prev => ({ ...prev, judgementdate: '' }))
+                  }}
+                  error={errors.judgementdate}
+                  required
+                />
+                
+                 <Input
+                  label="تاريخ استلام الحكم"
+                  type="date"
+                  value={formData.judgementrecivedate}
+                  onChange={(e) => {
+                    handleChange('judgementrecivedate', e.target.value)
+                    if (errors.judgementrecivedate) setErrors(prev => ({ ...prev, judgementrecivedate: '' }))
+                  }}
+                  error={errors.judgementrecivedate}
+                  required
+                />
+                
+              
+                {/* <Select
+                  label="المحكمة"
                   value={formData.court}
                   onChange={(e) => handleChange('court', e.target.value)}
                   options={[
                     { value: 'محكمة الاستئناف الإدارية - الرياض', label: 'محكمة الاستئناف الإدارية - الرياض' },
                     { value: 'محكمة الاستئناف التجارية - جدة', label: 'محكمة الاستئناف التجارية - جدة' }
                   ]}
+                /> */}
+                 <Input
+                  label="المحكمة"
+                  value={formData.court}
+                  onChange={(e) => handleChange('court', e.target.value)}
+                  required
                 /> */}
                  <Input
                   label="المحكمة"
@@ -469,7 +534,51 @@ const AppealCaseEdit = () => {
             </Card>
             
               <Card className="p-6 sticky top-6">
+             <Card title="معلومات التعديل" className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <span className="material-symbols-outlined">person_edit</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">القائم بالتعديل الحالي</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">أحمد المحمدي</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 flex items-center justify-center">
+                    <span className="material-symbols-outlined">update</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">تاريخ آخر حفظ</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">٢٤ مايو ٢٠٢٣، ١٠:٣٠ ص</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+          
+
+             <Card title="المرفقات" className="p-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-red-500">picture_as_pdf</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">لائحة الدعوى.pdf</span>
+                      <span className="text-[10px] text-slate-400">2.4 MB</span>
+                    </div>
+                  </div>
+                  <button className="text-slate-400 hover:text-red-500 transition-colors">
+                    <span className="material-symbols-outlined text-lg">delete</span>
+                  </button>
+                </div>
+              </div>
+            </Card>
+            
+              <Card className="p-6 sticky top-6">
               <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
+              {/* <div className="flex flex-col gap-2 mb-4">
               {/* <div className="flex flex-col gap-2 mb-4">
                 <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
                 <Select
@@ -480,6 +589,7 @@ const AppealCaseEdit = () => {
                     label: CASE_STATUS_LABELS[value]
                   }))}
                 />
+              </div> */}
               </div> */}
               <div className="flex flex-col gap-2 mb-4">
                 <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>

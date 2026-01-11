@@ -337,8 +337,47 @@ const PrimaryCases = () => {
                           </StatusBadge>
                         </td>
                         <td className="px-6 py-4">
+<<<<<<< HEAD
                           {currentUser?.role !== USER_ROLES.VIEWER ? (
                             <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+=======
+                          <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            <button
+                              onClick={() => navigate(`/cases/primary/${caseId}/edit`)}
+                              className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                              title="تعديل"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">edit</span>
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (window.confirm('هل أنت متأكد من حذف هذه القضية؟')) {
+                                  try {
+                                    await caseService.deletePrimaryCase(caseId)
+                                    fetchCases()
+                                  } catch (err) {
+                                    alert('فشل في حذف القضية')
+                                  }
+                                }
+                              }}
+                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                              title="حذف"
+                            >
+                              <span className="material-symbols-outlined text-[20px]">delete</span>
+                            </button>
+                            <div className="w-px h-4 bg-slate-200 dark:bg-slate-700 mx-1"></div>
+                            {canAppeal(judgment) ? (
+                              <Button
+                                size="sm"
+                                variant="primary"
+                                icon="gavel"
+                                onClick={() => navigate(`/cases/appeal/new?primary=${caseId}&judgment=${judgment}`)}
+                                className="text-xs"
+                              >
+                                استئناف
+                              </Button>
+                            ) : (
+>>>>>>> 332ad5a01774328755b009c7bc19f280e8d06e10
                               <button
                                 onClick={() => navigate(`/cases/primary/${caseId}/edit`)}
                                 className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
