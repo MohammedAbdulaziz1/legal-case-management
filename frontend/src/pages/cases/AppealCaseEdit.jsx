@@ -68,6 +68,8 @@ const AppealCaseEdit = () => {
       } else if (id) {
         fetchCase()
       }
+    } else {
+      setLoading(false)
     }
   }, [id, isNew, currentUser])
 
