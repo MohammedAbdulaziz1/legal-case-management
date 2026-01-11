@@ -33,7 +33,7 @@ const AppealCases = () => {
       })
       if (response.data.success) {
         setCases(response.data.data || [])
-        console.log(cases);
+          console.log(cases);
         setTotalItems(response.data.meta?.total || 0)
       }
     } catch (err) {

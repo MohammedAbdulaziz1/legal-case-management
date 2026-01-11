@@ -39,6 +39,17 @@ const AppealCaseEdit = () => {
   const [primaryCases, setPrimaryCases] = useState([])
   const [errors, setErrors] = useState({})
 
+  const normalizeDateInputValue = (value) => {
+    if (!value) return ''
+    if (typeof value === 'string') {
+      return value.includes('T') ? value.slice(0, 10) : value
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().slice(0, 10)
+    }
+    return ''
+  }
+
   // Redirect viewers to detail page (defense in depth)
   useEffect(() => {
     if (currentUser?.role === USER_ROLES.VIEWER) {
@@ -87,11 +98,15 @@ const AppealCaseEdit = () => {
       const response = await caseService.getAppealCase(id)
       if (response.data.success) {
         const caseData = response.data.data
+
         setFormData({
           caseNumber: caseData.caseNumber?.toString() || '',
           registrationDate: caseData.registrationDate || caseData.appealDate || '',
           courtNumber: caseData.courtNumber || 1,
           appealJudgment: caseData.appealJudgment || 'قيد النظر',
+          sessionDate:caseData.sessionDate || '',
+          judgementdate: normalizeDateInputValue(caseData.judgementdate),
+          judgementrecivedate: normalizeDateInputValue(caseData.judgementrecivedate),
           appealedBy: caseData.appealedBy || '',
           caseRegistrationId: caseData.caseRegistrationId?.toString() || '',
           court: caseData.court || '',
