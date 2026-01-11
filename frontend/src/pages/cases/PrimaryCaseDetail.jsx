@@ -142,7 +142,7 @@ const PrimaryCaseDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  رقم القضية
+                  رقم الدعوى
                 </label>
                 <p className="text-base font-semibold text-slate-900 dark:text-white">
                   {caseData.caseNumber || 'غير محدد'}
@@ -150,7 +150,7 @@ const PrimaryCaseDetail = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  تاريخ التسجيل
+                  تاريخ الدعوى
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {formatDate(caseData.registrationDate || caseData.caseDate)}
@@ -172,7 +172,7 @@ const PrimaryCaseDetail = () => {
                   {caseData.title || 'غير محدد'}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   اسم الموكل
                 </label>
@@ -189,7 +189,7 @@ const PrimaryCaseDetail = () => {
                   <span className="material-symbols-outlined text-lg text-slate-400">person_cancel</span>
                   {caseData.opponent || 'غير محدد'}
                 </p>
-              </div>
+              </div> */}
             </div>
           </Card>
 
@@ -197,20 +197,20 @@ const PrimaryCaseDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  الدائرة القضائية
+                  المحكمة 
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {caseData.court || 'غير محدد'}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   رقم الدائرة القضائية
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {caseData.courtNumber || 'غير محدد'}
                 </p>
-              </div>
+              </div> */}
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   اسم القاضي
@@ -237,7 +237,7 @@ const PrimaryCaseDetail = () => {
                   {caseData.nextSessionDate ? formatDate(caseData.nextSessionDate) : 'غير محدد'}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   حالة القضية
                 </label>
@@ -246,7 +246,7 @@ const PrimaryCaseDetail = () => {
                     {CASE_STATUS_LABELS[caseData.status] || 'قيد الإجراء'}
                   </StatusBadge>
                 </div>
-              </div>
+              </div> */}
               {caseData.notes && (
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
