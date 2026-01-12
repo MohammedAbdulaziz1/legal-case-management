@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Input from '../../components/common/Input'
+import DualDateInput from '../../components/common/DualDateInput'
 import Select from '../../components/common/Select'
 import Button from '../../components/common/Button'
 import { APPEALED_PARTIES_LABLES, CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
@@ -255,12 +256,11 @@ const SupremeCourtCaseEdit = () => {
                   error={errors.caseNumber}
                   required={isNew}
                 />
-                <Input
+                <DualDateInput
                   label="تاريخ العليا"
-                  type="date"
                   value={formData.registrationDate}
-                  onChange={(e) => {
-                    handleChange('registrationDate', e.target.value)
+                  onChange={(val) => {
+                    handleChange('registrationDate', val)
                     if (errors.registrationDate) setErrors(prev => ({ ...prev, registrationDate: '' }))
                   }}
                   error={errors.registrationDate}
@@ -281,12 +281,11 @@ const SupremeCourtCaseEdit = () => {
                     { value: APPEALED_PARTIES_LABLES[2], label: APPEALED_PARTIES_LABLES[2] },
                   ]}
                 />
-                 <Input
+                 <DualDateInput
                   label="تاريخ الجلسة"
-                  type="date"
                   value={formData.sessionDate}
-                  onChange={(e) => {
-                    handleChange('sessionDate', e.target.value)
+                  onChange={(val) => {
+                    handleChange('sessionDate', val)
                     if (errors.sessionDate) setErrors(prev => ({ ...prev, sessionDate: '' }))
                   }}
                   error={errors.sessionDate}
@@ -298,24 +297,22 @@ const SupremeCourtCaseEdit = () => {
                   onChange={(e) => handleChange('supremeCourtJudgment', e.target.value)}
                   required
                 />
-                 <Input
+                 <DualDateInput
                   label="تاريخ الحكم"
-                  type="date"
                   value={formData.judgementdate}
-                  onChange={(e) => {
-                    handleChange('judgementdate', e.target.value)
+                  onChange={(val) => {
+                    handleChange('judgementdate', val)
                     if (errors.judgementdate) setErrors(prev => ({ ...prev, judgementdate: '' }))
                   }}
                   error={errors.judgementdate}
                   required
                 />
                 
-                 <Input
+                 <DualDateInput
                   label="تاريخ استلام الحكم"
-                  type="date"
                   value={formData.judgementrecivedate}
-                  onChange={(e) => {
-                    handleChange('judgementrecivedate', e.target.value)
+                  onChange={(val) => {
+                    handleChange('judgementrecivedate', val)
                     if (errors.judgementrecivedate) setErrors(prev => ({ ...prev, judgementrecivedate: '' }))
                   }}
                   error={errors.judgementrecivedate}
