@@ -11,6 +11,8 @@ use App\Services\PermissionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+
 
 class UserController extends Controller
 {
@@ -26,6 +28,14 @@ class UserController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+       // Only admins can list users
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only admins can view user list.',
+            ], 403);
+        }
+
         $query = User::query();
 
         // Search
@@ -57,8 +67,21 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request): JsonResponse
     {
+        // Only admins can create users
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only admins can create user accounts.',
+            ], 403);
+        }
+
         $data = $request->validated();
         $data['password'] = Hash::make($data['password']);
+        
+        // Set default role to 'user' if not provided
+        if (empty($data['role'])) {
+            $data['role'] = 'user';
+        }
 
         $user = User::create($data);
 
@@ -71,8 +94,16 @@ class UserController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id): JsonResponse
+    public function show(Request $request, string $id): JsonResponse
     {
+        // Only admins can view user details
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only admins can view user details.',
+            ], 403);
+        }
+
         $user = User::findOrFail($id);
 
         return response()->json([
@@ -86,6 +117,14 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request, string $id): JsonResponse
     {
+        // Only admins can update users
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only admins can update users.',
+            ], 403);
+        }
+
         $user = User::findOrFail($id);
         $data = $request->validated();
 
@@ -104,8 +143,16 @@ class UserController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
+        // Only admins can delete users
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only admins can delete users.',
+            ], 403);
+        }
+
         $user = User::findOrFail($id);
         $user->delete();
 
@@ -118,8 +165,16 @@ class UserController extends Controller
     /**
      * Get user permissions
      */
-    public function permissions(string $id): JsonResponse
+    public function permissions(Request $request, string $id): JsonResponse
     {
+        // Only admins can view user permissions
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only admins can view user permissions.',
+            ], 403);
+        }
+
         $user = User::findOrFail($id);
         $permissions = $this->permissionService->getUserPermissions($user);
 
@@ -134,6 +189,14 @@ class UserController extends Controller
      */
     public function updatePermissions(Request $request, string $id): JsonResponse
     {
+        // Only admins can update user permissions
+        if ($request->user()->role !== 'admin') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Only admins can update user permissions.',
+            ], 403);
+        }
+
         $request->validate([
             'permissions' => ['required', 'array'],
         ]);

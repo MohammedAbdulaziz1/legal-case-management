@@ -15,6 +15,7 @@ import SupremeCourtCaseDetail from './pages/cases/SupremeCourtCaseDetail'
 import UserPermissions from './pages/users/UserPermissions'
 import ArchiveLog from './pages/archive/ArchiveLog'
 import ProtectedRoute from './components/common/ProtectedRoute'
+import AdminRoute from './components/common/AdminRoute'
 
 function App() {
   return (
@@ -138,9 +139,9 @@ function App() {
             <Route
               path="/users/permissions"
               element={
-                <ProtectedRoute>
+                <AdminRoute>
                   <UserPermissions />
-                </ProtectedRoute>
+                </AdminRoute>
               }
             />
             <Route

@@ -16,14 +16,30 @@ class SupremeCourt extends Model
         'supreme_date',
         'supreme_case_number',
         'appeal_request_id',
+        'appealed_by',
+        'sessionDate',
+        'supremeCourtJudgment',
+        'judgementdate',
+        'judgementrecivedate',
         'status',
+        'priority',
         'notes',
+        'court',
+        'judge',
+        'plaintiff',
+        'plaintiff_lawyer',
+        'defendant',
+        'defendant_lawyer',
+        'subject',
     ];
 
     protected function casts(): array
     {
         return [
             'supreme_date' => 'date',
+            'sessionDate' => 'date',
+            'judgementdate' => 'date',
+            'judgementrecivedate' => 'date',
         ];
     }
 

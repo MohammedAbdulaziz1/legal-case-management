@@ -3,21 +3,27 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Input from '../../components/common/Input'
+import DualDateInput from '../../components/common/DualDateInput'
 import Select from '../../components/common/Select'
 import Button from '../../components/common/Button'
-import { CASE_STATUSES, CASE_STATUS_LABELS } from '../../utils/constants'
+import { APPEALED_PARTIES_LABLES, CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { useAuth } from '../../context/AuthContext'
 
 const AppealCaseEdit = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const isNew = id === 'new' || !id
   const [loading, setLoading] = useState(!isNew)
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
     courtNumber: 1,
-    appealJudgment: 'قيد النظر',
+    appealJudgment: 'قيد المعالجة',
+    judgementdate: '',
+    judgementrecivedate: '',
+    sessionDate: '',
     appealedBy: '',
     caseRegistrationId: '',
     court: '',
@@ -34,13 +40,39 @@ const AppealCaseEdit = () => {
   const [primaryCases, setPrimaryCases] = useState([])
   const [errors, setErrors] = useState({})
 
-  useEffect(() => {
-    if (isNew) {
-      fetchPrimaryCases()
-    } else if (id) {
-      fetchCase()
+  const normalizeDateInputValue = (value) => {
+    if (!value) return ''
+    if (typeof value === 'string') {
+      return value.includes('T') ? value.slice(0, 10) : value
     }
-  }, [id, isNew])
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      return value.toISOString().slice(0, 10)
+    }
+    return ''
+  }
+
+  // Redirect viewers to detail page (defense in depth)
+  useEffect(() => {
+    if (currentUser?.role === USER_ROLES.VIEWER) {
+      if (isNew) {
+        navigate('/cases/appeal', { replace: true })
+      } else {
+        navigate(`/cases/appeal/${id}`, { replace: true })
+      }
+    }
+  }, [currentUser, isNew, id, navigate])
+
+  useEffect(() => {
+    if (currentUser?.role !== USER_ROLES.VIEWER) {
+      if (isNew) {
+        fetchPrimaryCases()
+      } else if (id) {
+        fetchCase()
+      }
+    } else {
+      setLoading(false)
+    }
+  }, [id, isNew, currentUser])
 
   const fetchPrimaryCases = async () => {
     try {
@@ -50,8 +82,12 @@ const AppealCaseEdit = () => {
         // Check if there's a primary case ID in query params
         const urlParams = new URLSearchParams(window.location.search)
         const primaryId = urlParams.get('primary')
+        const judgment = urlParams.get('judgment')
         if (primaryId) {
           setFormData(prev => ({ ...prev, caseRegistrationId: primaryId }))
+        }
+         if (judgment) {
+          setFormData(prev => ({ ...prev, appealedBy: APPEALED_PARTIES_LABLES[judgment] }))
         }
       }
     } catch (err) {
@@ -65,11 +101,15 @@ const AppealCaseEdit = () => {
       const response = await caseService.getAppealCase(id)
       if (response.data.success) {
         const caseData = response.data.data
+
         setFormData({
           caseNumber: caseData.caseNumber?.toString() || '',
           registrationDate: caseData.registrationDate || caseData.appealDate || '',
           courtNumber: caseData.courtNumber || 1,
           appealJudgment: caseData.appealJudgment || 'قيد النظر',
+          sessionDate:caseData.sessionDate || '',
+          judgementdate: normalizeDateInputValue(caseData.judgementdate),
+          judgementrecivedate: normalizeDateInputValue(caseData.judgementrecivedate),
           appealedBy: caseData.appealedBy || '',
           caseRegistrationId: caseData.caseRegistrationId?.toString() || '',
           court: caseData.court || '',
@@ -121,6 +161,9 @@ const AppealCaseEdit = () => {
     if (!formData.courtNumber || formData.courtNumber < 1) validationErrors.courtNumber = 'رقم الدائرة القضائية مطلوب'
     if (!formData.appealJudgment) validationErrors.appealJudgment = 'حكم الاستئناف مطلوب'
     if (!formData.appealedBy) validationErrors.appealedBy = 'المستأنف مطلوب'
+    if (!formData.sessionDate) validationErrors.sessionDate = 'تاريخ الجلسة مطلوب'
+    if (!formData.judgementdate) validationErrors.judgementdate = 'تاريخ الحكم مطلوب'
+    if (!formData.judgementrecivedate) validationErrors.judgementrecivedate = 'تاريخ استلام الحكم مطلوب'
     if (isNew && !formData.caseRegistrationId) validationErrors.caseRegistrationId = 'القضية الابتدائية مطلوبة'
     
     if (Object.keys(validationErrors).length > 0) {
@@ -214,7 +257,7 @@ const AppealCaseEdit = () => {
                   </div>
                 )}
                 <Input
-                  label="رقم القضية (المرجع)"
+                  label="رقم الاستئناف"
                   value={formData.caseNumber}
                   onChange={(e) => {
                     handleChange('caseNumber', e.target.value)
@@ -224,18 +267,17 @@ const AppealCaseEdit = () => {
                   error={errors.caseNumber}
                   required={isNew}
                 />
-                <Input
-                  label="تاريخ التسجيل"
-                  type="date"
+                <DualDateInput
+                  label="تاريخ الحكم المستانف"
                   value={formData.registrationDate}
-                  onChange={(e) => {
-                    handleChange('registrationDate', e.target.value)
+                  onChange={(val) => {
+                    handleChange('registrationDate', val)
                     if (errors.registrationDate) setErrors(prev => ({ ...prev, registrationDate: '' }))
                   }}
                   error={errors.registrationDate}
                   required
                 />
-                <Input
+                {/* <Input
                   label="رقم الدائرة القضائية"
                   type="number"
                   value={formData.courtNumber}
@@ -246,7 +288,7 @@ const AppealCaseEdit = () => {
                   error={errors.courtNumber}
                   required
                   min="1"
-                />
+                /> */}
                 <Select
                   label="حكم الاستئناف"
                   value={formData.appealJudgment}
@@ -257,13 +299,13 @@ const AppealCaseEdit = () => {
                   error={errors.appealJudgment}
                   required
                   options={[
-                    { value: 'قيد النظر', label: 'قيد النظر' },
-                    { value: 'للمدعي', label: 'للمدعي' },
-                    { value: 'ضد المدعي', label: 'ضد المدعي' },
-                    { value: 'تم الحكم', label: 'تم الحكم' }
+                    {value: 'قيد المعالجة' , label: 'قيد المعالجة'} ,                 
+                    { value: 'بتأييد الحكم', label: 'بتأييد الحكم' },
+                    { value: 'الغاء الحكم', label: 'الغاء الحكم' },
+                    
                   ]}
                 />
-                <Input
+                  <Input
                   label="المستأنف"
                   value={formData.appealedBy}
                   onChange={(e) => {
@@ -274,14 +316,53 @@ const AppealCaseEdit = () => {
                   required
                   placeholder="من قام بالاستئناف"
                 />
-                <Select
-                  label="المحكمة المختصة"
+              <DualDateInput
+                  label="تاريخ الجلسة"
+                  value={formData.sessionDate}
+                  onChange={(val) => {
+                    handleChange('sessionDate', val)
+                    if (errors.sessionDate) setErrors(prev => ({ ...prev, sessionDate: '' }))
+                  }}
+                  error={errors.sessionDate}
+                  required
+                />
+                 <DualDateInput
+                  label="تاريخ الحكم"
+                  value={formData.judgementdate}
+                  onChange={(val) => {
+                    handleChange('judgementdate', val)
+                    if (errors.judgementdate) setErrors(prev => ({ ...prev, judgementdate: '' }))
+                  }}
+                  error={errors.judgementdate}
+                  required
+                />
+                
+                 <DualDateInput
+                  label="تاريخ استلام الحكم"
+                  value={formData.judgementrecivedate}
+                  onChange={(val) => {
+                    handleChange('judgementrecivedate', val)
+                    if (errors.judgementrecivedate) setErrors(prev => ({ ...prev, judgementrecivedate: '' }))
+                  }}
+                  error={errors.judgementrecivedate}
+                  required
+                />
+                
+              
+                {/* <Select
+                  label="المحكمة"
                   value={formData.court}
                   onChange={(e) => handleChange('court', e.target.value)}
                   options={[
                     { value: 'محكمة الاستئناف الإدارية - الرياض', label: 'محكمة الاستئناف الإدارية - الرياض' },
                     { value: 'محكمة الاستئناف التجارية - جدة', label: 'محكمة الاستئناف التجارية - جدة' }
                   ]}
+                /> */}
+                 <Input
+                  label="المحكمة"
+                  value={formData.court}
+                  onChange={(e) => handleChange('court', e.target.value)}
+                  required
                 />
                 <Input
                   label="اسم القاضي"
@@ -342,9 +423,51 @@ const AppealCaseEdit = () => {
           </div>
 
           <div className="lg:col-span-4 flex flex-col gap-6">
-            <Card className="p-6 sticky top-6">
+             <Card title="معلومات التعديل" className="p-6">
+              <div className="space-y-4">
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                    <span className="material-symbols-outlined">person_edit</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">القائم بالتعديل الحالي</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">أحمد المحمدي</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="size-10 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 flex items-center justify-center">
+                    <span className="material-symbols-outlined">update</span>
+                  </div>
+                  <div>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">تاريخ آخر حفظ</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-white">٢٤ مايو ٢٠٢٣، ١٠:٣٠ ص</p>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+          
+
+             <Card title="المرفقات" className="p-6">
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
+                  <div className="flex items-center gap-3">
+                    <span className="material-symbols-outlined text-red-500">picture_as_pdf</span>
+                    <div className="flex flex-col">
+                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">لائحة الدعوى.pdf</span>
+                      <span className="text-[10px] text-slate-400">2.4 MB</span>
+                    </div>
+                  </div>
+                  <button className="text-slate-400 hover:text-red-500 transition-colors">
+                    <span className="material-symbols-outlined text-lg">delete</span>
+                  </button>
+                </div>
+              </div>
+            </Card>
+            
+              <Card className="p-6 sticky top-6">
               <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
-              <div className="flex flex-col gap-2 mb-4">
+              {/* <div className="flex flex-col gap-2 mb-4">
                 <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
                 <Select
                   value={formData.status}
@@ -354,7 +477,7 @@ const AppealCaseEdit = () => {
                     label: CASE_STATUS_LABELS[value]
                   }))}
                 />
-              </div>
+              </div> */}
               <div className="flex flex-col gap-2 mb-4">
                 <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
                 <div className="flex items-center gap-3">

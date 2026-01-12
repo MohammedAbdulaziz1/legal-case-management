@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
@@ -6,43 +7,45 @@ import Select from '../../components/common/Select'
 import Avatar from '../../components/ui/Avatar'
 import { USER_ROLES, USER_ROLE_LABELS } from '../../utils/constants'
 import { userService } from '../../services/userService'
+import { useAuth } from '../../context/AuthContext'
 
 const UserPermissions = () => {
+  const { user: currentUser } = useAuth()
+  const navigate = useNavigate()
   const [users, setUsers] = useState([])
   const [selectedUser, setSelectedUser] = useState(null)
   const [selectedUserId, setSelectedUserId] = useState(null)
   const [role, setRole] = useState(USER_ROLES.ADMIN)
-  const [permissions, setPermissions] = useState({
-    primaryCases: {
-      enabled: false,
-      view: false,
-      add: false,
-      edit: false,
-      delete: false
-    },
-    appealCases: {
-      enabled: false
-    },
-    userManagement: {
-      enabled: false,
-      view: false,
-      edit: false
-    }
+  const [deletingUserId, setDeletingUserId] = useState(null)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [newUser, setNewUser] = useState({
+    name: '',
+    email: '',
+    password: '',
+    role: USER_ROLES.USER
   })
+  const [createLoading, setCreateLoading] = useState(false)
+  const [createError, setCreateError] = useState('')
   const [loading, setLoading] = useState(true)
-  const [permissionsLoading, setPermissionsLoading] = useState(false)
   const [error, setError] = useState(null)
   const [saving, setSaving] = useState(false)
 
+  // Redirect non-admin users to dashboard (defense in depth)
   useEffect(() => {
-    fetchUsers()
-  }, [])
+    // Only redirect if user is loaded and is not admin
+    if (currentUser !== null && currentUser !== undefined && currentUser.role !== USER_ROLES.ADMIN) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [currentUser, navigate])
 
   useEffect(() => {
-    if (selectedUserId) {
-      fetchUserPermissions(selectedUserId)
+    // Only fetch users if current user is admin
+    if (currentUser?.role === USER_ROLES.ADMIN) {
+      fetchUsers()
     }
-  }, [selectedUserId])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentUser])
+
 
   const fetchUsers = async () => {
     try {
@@ -65,105 +68,60 @@ const UserPermissions = () => {
     }
   }
 
-  const fetchUserPermissions = async (userId) => {
-    try {
-      setPermissionsLoading(true)
-      const response = await userService.getUserPermissions(userId)
-      if (response.data.success) {
-        const perms = response.data.permissions || []
-        // Transform API permissions array to component format
-        const formattedPerms = {
-          primaryCases: {
-            enabled: false,
-            view: false,
-            add: false,
-            edit: false,
-            delete: false
-          },
-          appealCases: {
-            enabled: false
-          },
-          userManagement: {
-            enabled: false,
-            view: false,
-            edit: false
-          }
-        }
-        
-        perms.forEach(perm => {
-          if (perm.module === 'primary_cases' || perm.module === 'primaryCases') {
-            formattedPerms.primaryCases = {
-              enabled: perm.enabled || false,
-              view: perm.view || false,
-              add: perm.add || false,
-              edit: perm.edit || false,
-              delete: perm.delete || false
-            }
-          } else if (perm.module === 'appeal_cases' || perm.module === 'appealCases') {
-            formattedPerms.appealCases = {
-              enabled: perm.enabled || false
-            }
-          } else if (perm.module === 'user_management' || perm.module === 'userManagement') {
-            formattedPerms.userManagement = {
-              enabled: perm.enabled || false,
-              view: perm.view || false,
-              edit: perm.edit || false
-            }
-          }
-        })
-        
-        setPermissions(formattedPerms)
-      }
-    } catch (err) {
-      console.error('Error fetching user permissions:', err)
-      setPermissions({
-        primaryCases: { enabled: false, view: false, add: false, edit: false, delete: false },
-        appealCases: { enabled: false },
-        userManagement: { enabled: false, view: false, edit: false }
-      })
-    } finally {
-      setPermissionsLoading(false)
-    }
-  }
 
   const handleUserSelect = (user) => {
     setSelectedUser(user)
     setSelectedUserId(user.id)
-    setRole(user.role)
+    // Map old roles (lawyer, trainee, clerk) to 'user' for the role template dropdown
+    const normalizedRole = (user.role === 'lawyer' || user.role === 'trainee' || user.role === 'clerk') 
+      ? USER_ROLES.USER 
+      : user.role
+    setRole(normalizedRole || USER_ROLES.USER)
   }
 
-  const handleSavePermissions = async () => {
-    if (!selectedUserId) return
+  const handleRoleChange = async (e) => {
+    const newRole = e.target.value
+    if (!selectedUserId || !newRole) return
+    
+    // Prevent admin from changing their own role
+    if (currentUser?.id === selectedUserId && currentUser?.role === USER_ROLES.ADMIN) {
+      alert('لا يمكنك تغيير دورك الخاص. يرجى استخدام مستخدم إداري آخر لتغيير هذا الدور.')
+      // Revert to original role
+      const normalizedRole = (selectedUser?.role === 'lawyer' || selectedUser?.role === 'trainee' || selectedUser?.role === 'clerk') 
+        ? USER_ROLES.USER 
+        : selectedUser?.role
+      setRole(normalizedRole || USER_ROLES.USER)
+      return
+    }
+    
+    // Update local state immediately for better UX
+    setRole(newRole)
     
     try {
       setSaving(true)
-      // Transform component format to API format
-      const apiPermissions = [
-        {
-          module: 'primary_cases',
-          enabled: permissions.primaryCases.enabled,
-          view: permissions.primaryCases.view,
-          add: permissions.primaryCases.add,
-          edit: permissions.primaryCases.edit,
-          delete: permissions.primaryCases.delete
-        },
-        {
-          module: 'appeal_cases',
-          enabled: permissions.appealCases.enabled
-        },
-        {
-          module: 'user_management',
-          enabled: permissions.userManagement.enabled,
-          view: permissions.userManagement.view,
-          edit: permissions.userManagement.edit
-        }
-      ]
+      await userService.updateUser(selectedUserId, { role: newRole })
       
-      await userService.updateUserPermissions(selectedUserId, apiPermissions)
-      alert('تم حفظ الصلاحيات بنجاح')
+      // Update the selected user's role in the users list
+      setUsers(prevUsers => 
+        prevUsers.map(user => 
+          user.id === selectedUserId ? { ...user, role: newRole } : user
+        )
+      )
+      
+      // Update selected user
+      if (selectedUser) {
+        setSelectedUser({ ...selectedUser, role: newRole })
+      }
+      
+      alert('تم تحديث الدور بنجاح')
     } catch (err) {
-      console.error('Error saving permissions:', err)
-      alert('فشل في حفظ الصلاحيات')
+      console.error('Error updating role:', err)
+      // Revert role on error
+      const normalizedRole = (selectedUser?.role === 'lawyer' || selectedUser?.role === 'trainee' || selectedUser?.role === 'clerk') 
+        ? USER_ROLES.USER 
+        : selectedUser?.role
+      setRole(normalizedRole || USER_ROLES.USER)
+      alert(err.response?.data?.message || 'فشل في تحديث الدور. يرجى المحاولة مرة أخرى.')
     } finally {
       setSaving(false)
     }
@@ -175,24 +133,82 @@ const UserPermissions = () => {
     { label: 'إدارة الصلاحيات' }
   ]
 
-  const togglePermission = (section, field) => {
-    setPermissions(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: !prev[section][field]
-      }
-    }))
+  // Helper function to get role label, mapping old roles (lawyer, trainee, clerk) to 'user'
+  const getRoleLabel = (role) => {
+    if (!role) return ''
+    // Map old roles to user
+    if (role === 'lawyer' || role === 'trainee' || role === 'clerk') {
+      return USER_ROLE_LABELS[USER_ROLES.USER] || 'مستخدم'
+    }
+    return USER_ROLE_LABELS[role] || role
   }
 
-  const toggleSection = (section) => {
-    setPermissions(prev => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        enabled: !prev[section].enabled
+
+  const handleDeleteUser = async (userId, userName, e) => {
+    e.stopPropagation() // Prevent row click
+    
+    // Prevent deleting yourself
+    if (currentUser?.id === userId) {
+      alert('لا يمكنك حذف حسابك الخاص. يرجى استخدام مستخدم إداري آخر لحذف هذا الحساب.')
+      return
+    }
+    
+    // Confirm deletion
+    if (!window.confirm(`هل أنت متأكد من حذف المستخدم "${userName}"؟\n\nلا يمكن التراجع عن هذا الإجراء.`)) {
+      return
+    }
+
+    try {
+      setDeletingUserId(userId)
+      await userService.deleteUser(userId)
+      
+      // If we deleted the selected user, clear selection
+      if (selectedUserId === userId) {
+        setSelectedUser(null)
+        setSelectedUserId(null)
       }
-    }))
+      
+      // Refresh users list
+      await fetchUsers()
+      alert('تم حذف المستخدم بنجاح')
+    } catch (err) {
+      console.error('Error deleting user:', err)
+      alert(err.response?.data?.message || 'فشل في حذف المستخدم. يرجى المحاولة مرة أخرى.')
+    } finally {
+      setDeletingUserId(null)
+    }
+  }
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault()
+    setCreateError('')
+    setCreateLoading(true)
+
+    try {
+      // Ensure role is always set to a valid value
+      const userData = {
+        ...newUser,
+        role: newUser.role || USER_ROLES.USER
+      }
+      
+      const response = await userService.createUser(userData)
+      if (response.data.success) {
+        setShowCreateModal(false)
+        setNewUser({ name: '', email: '', password: '', role: USER_ROLES.USER })
+        setCreateError('')
+        fetchUsers() // Refresh the users list
+        alert('تم إنشاء المستخدم بنجاح')
+      }
+    } catch (err) {
+      console.error('Error creating user:', err)
+      const errorMessage = err.response?.data?.message || 
+                          err.response?.data?.errors?.role?.[0] ||
+                          err.response?.data?.errors?.email?.[0] || 
+                          'فشل في إنشاء المستخدم. يرجى المحاولة مرة أخرى.'
+      setCreateError(errorMessage)
+    } finally {
+      setCreateLoading(false)
+    }
   }
 
   return (
@@ -208,7 +224,15 @@ const UserPermissions = () => {
         </div>
         <div className="flex gap-3">
           <Button variant="secondary" icon="file_download">تصدير القائمة</Button>
-          <Button variant="primary" icon="person_add">إضافة مستخدم</Button>
+          {currentUser?.role === USER_ROLES.ADMIN && (
+            <Button 
+              variant="primary" 
+              icon="person_add"
+              onClick={() => setShowCreateModal(true)}
+            >
+              إضافة مستخدم
+            </Button>
+          )}
         </div>
       </div>
 
@@ -296,7 +320,7 @@ const UserPermissions = () => {
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center rounded-md bg-purple-50 dark:bg-purple-900/30 px-2 py-1 text-xs font-medium text-purple-700 dark:text-purple-300">
-                            {USER_ROLE_LABELS[user.role] || user.role}
+                            {getRoleLabel(user.role)}
                           </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -306,9 +330,28 @@ const UserPermissions = () => {
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-center">
-                          <button className="text-primary hover:text-blue-700 p-2 rounded-full hover:bg-primary/10 transition-colors">
-                            <span className="material-symbols-outlined text-[20px]">edit_square</span>
-                          </button>
+                          <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+                            {currentUser?.role === USER_ROLES.ADMIN && (
+                              <>
+                                <button
+                                  className="text-primary hover:text-blue-700 p-2 rounded-full hover:bg-primary/10 transition-colors"
+                                  title="تعديل"
+                                >
+                                  <span className="material-symbols-outlined text-[20px]">edit_square</span>
+                                </button>
+                                <button
+                                  onClick={(e) => handleDeleteUser(user.id, user.name, e)}
+                                  disabled={deletingUserId === user.id || currentUser?.id === user.id}
+                                  className="text-red-500 hover:text-red-700 p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title={currentUser?.id === user.id ? 'لا يمكنك حذف حسابك الخاص' : 'حذف'}
+                                >
+                                  <span className="material-symbols-outlined text-[20px]">
+                                    {deletingUserId === user.id ? 'hourglass_empty' : 'delete'}
+                                  </span>
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))
@@ -324,127 +367,197 @@ const UserPermissions = () => {
           <Card className="sticky top-24 max-h-[calc(100vh-8rem)] flex flex-col">
             <div className="p-6 border-b border-slate-200 dark:border-slate-700 flex justify-between items-start shrink-0">
               <div>
-                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">تعديل الصلاحيات</h3>
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-1">تعديل الدور</h3>
                 <p className="text-sm text-slate-500 dark:text-slate-400">
-                  تخصيص الوصول للمستخدم: <span className="font-semibold text-primary">{selectedUser?.name || 'اختر مستخدم'}</span>
+                  تغيير دور المستخدم: <span className="font-semibold text-primary">{selectedUser?.name || 'اختر مستخدم'}</span>
                 </p>
               </div>
             </div>
 
             <div className="p-6 pb-2 shrink-0">
               <Select
-                label="قالب الدور الوظيفي"
+                label="الدور الوظيفي"
                 value={role}
-                onChange={(e) => setRole(e.target.value)}
+                onChange={handleRoleChange}
+                disabled={!selectedUserId || saving || (currentUser?.id === selectedUserId && currentUser?.role === USER_ROLES.ADMIN)}
                 options={Object.entries(USER_ROLES).map(([key, value]) => ({
                   value,
                   label: USER_ROLE_LABELS[value]
                 }))}
               />
+              {currentUser?.id === selectedUserId && currentUser?.role === USER_ROLES.ADMIN && (
+                <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+                  لا يمكنك تغيير دورك الخاص. يرجى استخدام مستخدم إداري آخر لتغيير هذا الدور.
+                </p>
+              )}
             </div>
 
-            <div className="p-6 overflow-y-auto space-y-6 flex-1">
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-dashed border-slate-200 dark:border-slate-700">
-                  <span className="material-symbols-outlined text-slate-500">gavel</span>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">إدارة القضايا</h4>
-                </div>
-
-                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm font-bold text-slate-900 dark:text-white">القضايا الابتدائية</span>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={permissions.primaryCases.enabled}
-                        onChange={() => toggleSection('primaryCases')}
-                        className="sr-only peer"
-                      />
-                      <div className="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                    </label>
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-4">
+                <div className="flex items-start gap-3">
+                  <span className="material-symbols-outlined text-blue-600 dark:text-blue-400 mt-0.5">info</span>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900 dark:text-blue-300 mb-1">
+                      الصلاحيات محددة تلقائياً حسب الدور
+                    </p>
+                    <ul className="text-xs text-blue-700 dark:text-blue-400 space-y-1 list-disc list-inside">
+                      <li><strong>مدير النظام:</strong> جميع الصلاحيات</li>
+                      <li><strong>مستخدم:</strong> جميع صلاحيات القضايا (بدون إدارة المستخدمين)</li>
+                      <li><strong>عارض:</strong> عرض فقط (لا يمكن التعديل أو الحذف)</li>
+                    </ul>
                   </div>
-                  {permissions.primaryCases.enabled && (
-                    <div className="grid grid-cols-2 gap-3">
-                      {['view', 'add', 'edit', 'delete'].map((perm) => (
-                        <label key={perm} className="flex items-center gap-2 cursor-pointer select-none">
-                          <input
-                            type="checkbox"
-                            checked={permissions.primaryCases[perm] || false}
-                            onChange={() => togglePermission('primaryCases', perm)}
-                            className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                          />
-                          <span className={`text-xs font-medium ${perm === 'delete' ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'}`}>
-                            {perm === 'view' ? 'عرض التفاصيل' :
-                             perm === 'add' ? 'إضافة جلسات' :
-                             perm === 'edit' ? 'تعديل البيانات' :
-                             'حذف القضية'}
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center gap-2 pb-2 border-b border-dashed border-slate-200 dark:border-slate-700">
-                  <span className="material-symbols-outlined text-slate-500">admin_panel_settings</span>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">إدارة النظام</h4>
-                </div>
-
-                <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-lg border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors">
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-sm font-bold text-slate-900 dark:text-white">إدارة المستخدمين</span>
-                    <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={permissions.userManagement.enabled}
-                        onChange={() => toggleSection('userManagement')}
-                        className="sr-only peer"
-                      />
-                      <div className="relative w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/20 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                    </label>
-                  </div>
-                  {permissions.userManagement.enabled && (
-                    <div className="grid grid-cols-2 gap-3">
-                      <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={permissions.userManagement.view || false}
-                          onChange={() => togglePermission('userManagement', 'view')}
-                          className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                        />
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">عرض القائمة</span>
-                      </label>
-                      <label className="flex items-center gap-2 cursor-pointer select-none">
-                        <input
-                          type="checkbox"
-                          checked={permissions.userManagement.edit || false}
-                          onChange={() => togglePermission('userManagement', 'edit')}
-                          className="w-4 h-4 text-primary bg-white border-gray-300 rounded focus:ring-primary focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
-                        />
-                        <span className="text-xs text-slate-500 dark:text-slate-400 font-medium">تعديل الصلاحيات</span>
-                      </label>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
 
             <div className="p-6 border-t border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 rounded-b-xl flex justify-end gap-3 shrink-0">
-              <Button variant="secondary" disabled={!selectedUserId}>إلغاء</Button>
-              <Button 
-                variant="primary" 
-                icon="save" 
-                onClick={handleSavePermissions}
-                disabled={!selectedUserId || saving || permissionsLoading}
-              >
-                {saving ? 'جاري الحفظ...' : 'حفظ التغييرات'}
-              </Button>
+              {!selectedUserId && (
+                <p className="text-sm text-slate-500 dark:text-slate-400 flex-1">
+                  اختر مستخدماً لتعديل دوره
+                </p>
+              )}
             </div>
           </Card>
         </div>
       </div>
+
+      {/* Create User Modal */}
+      {showCreateModal && (
+        <div 
+          className="fixed inset-0 bg-black/50 dark:bg-black/70 flex items-center justify-center z-50 p-4"
+          onClick={() => {
+            if (!createLoading) {
+              setShowCreateModal(false)
+              setNewUser({ name: '', email: '', password: '', role: USER_ROLES.USER })
+              setCreateError('')
+            }
+          }}
+        >
+          <Card 
+            className="w-full max-w-md max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                  إضافة مستخدم جديد
+                </h2>
+                <button
+                  onClick={() => {
+                    if (!createLoading) {
+                      setShowCreateModal(false)
+                      setNewUser({ name: '', email: '', password: '', role: USER_ROLES.USER })
+                      setCreateError('')
+                    }
+                  }}
+                  disabled={createLoading}
+                  className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="material-symbols-outlined">close</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleCreateUser} className="space-y-4">
+                {createError && (
+                  <div className="p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800">
+                    <p className="text-sm text-red-600 dark:text-red-400">{createError}</p>
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    الاسم الكامل
+                    <span className="text-red-500 mr-1">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="أدخل الاسم الكامل"
+                    value={newUser.name}
+                    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+                    required
+                    disabled={createLoading}
+                    className="w-full pr-4 pl-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    البريد الإلكتروني
+                    <span className="text-red-500 mr-1">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    placeholder="example@lawfirm.com"
+                    value={newUser.email}
+                    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+                    required
+                    disabled={createLoading}
+                    className="w-full pr-4 pl-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    كلمة المرور
+                    <span className="text-red-500 mr-1">*</span>
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="كلمة مرور قوية (8 أحرف على الأقل)"
+                    value={newUser.password}
+                    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+                    required
+                    minLength={8}
+                    disabled={createLoading}
+                    className="w-full pr-4 pl-4 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow disabled:opacity-50 disabled:cursor-not-allowed"
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+                    الدور
+                    <span className="text-red-500 mr-1">*</span>
+                  </label>
+                  <Select
+                    value={newUser.role}
+                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+                    disabled={createLoading}
+                    options={[
+                      { value: USER_ROLES.ADMIN, label: USER_ROLE_LABELS[USER_ROLES.ADMIN] },
+                      { value: USER_ROLES.USER, label: USER_ROLE_LABELS[USER_ROLES.USER] },
+                      { value: USER_ROLES.VIEWER, label: USER_ROLE_LABELS[USER_ROLES.VIEWER] }
+                    ]}
+                  />
+                </div>
+
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setShowCreateModal(false)
+                      setNewUser({ name: '', email: '', password: '', role: USER_ROLES.USER })
+                      setCreateError('')
+                    }}
+                    disabled={createLoading}
+                    className="flex-1"
+                  >
+                    إلغاء
+                  </Button>
+                  <Button
+                    type="submit"
+                    variant="primary"
+                    disabled={createLoading || !newUser.name || !newUser.email || !newUser.password || newUser.password.length < 8}
+                    className="flex-1"
+                  >
+                    {createLoading ? 'جاري الإنشاء...' : 'إنشاء مستخدم'}
+                  </Button>
+                </div>
+              </form>
+            </div>
+          </Card>
+        </div>
+      )}
     </Layout>
   )
 }

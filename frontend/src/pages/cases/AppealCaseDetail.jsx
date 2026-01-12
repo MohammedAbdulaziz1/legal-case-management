@@ -4,12 +4,14 @@ import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
-import { CASE_STATUSES, CASE_STATUS_LABELS } from '../../utils/constants'
+import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { useAuth } from '../../context/AuthContext'
 
 const AppealCaseDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [caseData, setCaseData] = useState(null)
@@ -112,9 +114,11 @@ const AppealCaseDetail = () => {
           <Button variant="secondary" icon="arrow_back" onClick={() => navigate('/cases/appeal')}>
             العودة للقائمة
           </Button>
-          <Button variant="primary" icon="edit" onClick={() => navigate(`/cases/appeal/${id}/edit`)}>
-            تعديل القضية
-          </Button>
+          {currentUser?.role !== USER_ROLES.VIEWER && (
+            <Button variant="primary" icon="edit" onClick={() => navigate(`/cases/appeal/${id}/edit`)}>
+              تعديل القضية
+            </Button>
+          )}
         </div>
       </div>
 
@@ -124,15 +128,35 @@ const AppealCaseDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  رقم القضية (المرجع)
+                  رقم الاستئناف
                 </label>
                 <p className="text-base font-semibold text-slate-900 dark:text-white">
                   {caseData.caseNumber || caseData.appealNumber || 'غير محدد'}
                 </p>
               </div>
+               {caseData.caseRegistrationId && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                    القضية الابتدائية المرتبطة
+                  </label>
+                  <p className="text-base text-slate-900 dark:text-white">
+                    #{caseData.caseRegistrationId}
+                  </p>
+                </div>
+              )}
+              {!caseData.caseRegistrationId && (caseData.assignedCaseRegistrationRequestId || caseData.assigned_case_registration_request_id) && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                    القضية الابتدائية المرتبطة
+                  </label>
+                  <p className="text-base text-slate-900 dark:text-white">
+                    #{caseData.assignedCaseRegistrationRequestId || caseData.assigned_case_registration_request_id}
+                  </p>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  تاريخ التسجيل
+                  تاريخ الاستئناف
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {formatDate(caseData.registrationDate || caseData.appealDate)}
@@ -140,12 +164,36 @@ const AppealCaseDetail = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  تاريخ الجلسة
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {formatDate(caseData.sessionDate)}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  تاريخ الحكم
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {formatDate(caseData.judgementdate)}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  تاريخ استلام الحكم
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {formatDate(caseData.judgementrecivedate)}
+                </p>
+              </div>
+              {/* <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   رقم الدائرة القضائية
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {caseData.courtNumber || caseData.appealCourtNumber || 'غير محدد'}
                 </p>
-              </div>
+              </div> */}
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   حكم الاستئناف
@@ -166,7 +214,7 @@ const AppealCaseDetail = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  المحكمة المختصة
+                  المحكمة 
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {caseData.court || 'غير محدد'}
@@ -180,16 +228,7 @@ const AppealCaseDetail = () => {
                   {caseData.judge || 'غير محدد'}
                 </p>
               </div>
-              {caseData.caseRegistrationId && (
-                <div>
-                  <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                    القضية الابتدائية المرتبطة
-                  </label>
-                  <p className="text-base text-slate-900 dark:text-white">
-                    #{caseData.caseRegistrationId}
-                  </p>
-                </div>
-              )}
+             
             </div>
           </Card>
 
@@ -209,7 +248,7 @@ const AppealCaseDetail = () => {
                   المحامي الوكيل (المدعي)
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
-                  {caseData.plaintiffLawyer || 'غير محدد'}
+                  {caseData.plaintiffLawyer || caseData.plaintiff_lawyer || 'غير محدد'}
                 </p>
               </div>
               <div>
@@ -226,7 +265,7 @@ const AppealCaseDetail = () => {
                   المحامي الوكيل (المدعى عليه)
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
-                  {caseData.defendantLawyer || 'غير محدد'}
+                  {caseData.defendantLawyer || caseData.defendant_lawyer || 'غير محدد'}
                 </p>
               </div>
             </div>

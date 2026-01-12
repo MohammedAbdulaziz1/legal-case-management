@@ -43,8 +43,16 @@ class CaseRegistrationController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Sorting
+        $allowedSorts = ['case_number', 'case_date', 'session_date', 'created_at', 'title'];
+        $sortBy = $request->get('sort_by', 'created_at');
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $order = strtolower($request->get('order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
         $perPage = $request->get('per_page', 10);
-        $cases = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $cases = $query->orderBy($sortBy, $order)->paginate($perPage);
 
         return response()->json([
             'success' => true,
@@ -59,10 +67,79 @@ class CaseRegistrationController extends Controller
     }
 
     /**
+     * Export filtered/sorted list as CSV.
+     */
+    public function export(Request $request)
+    {
+        $query = CaseRegistration::query();
+
+        if ($request->has('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('case_number', 'like', "%{$search}%")
+                  ->orWhere('title', 'like', "%{$search}%")
+                  ->orWhere('client', 'like', "%{$search}%")
+                  ->orWhere('opponent', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->has('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $allowedSorts = ['case_number', 'case_date', 'session_date', 'created_at', 'title'];
+        $sortBy = $request->get('sort_by', 'created_at');
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $order = strtolower($request->get('order', 'desc')) === 'asc' ? 'asc' : 'desc';
+
+        $cases = $query->orderBy($sortBy, $order)->get();
+
+        $columns = ['case_number', 'case_date', 'title', 'client', 'opponent', 'session_date', 'first_instance_judgment', 'status'];
+
+        $callback = function () use ($cases, $columns) {
+            $handle = fopen('php://output', 'w');
+            // Header
+            fputcsv($handle, $columns);
+
+            foreach ($cases as $c) {
+                fputcsv($handle, [
+                    $c->case_number,
+                    $c->case_date,
+                    $c->title,
+                    $c->client,
+                    $c->opponent,
+                    $c->session_date,
+                    $c->first_instance_judgment ?? $c->judgment ?? '',
+                    $c->status,
+                ]);
+            }
+
+            fclose($handle);
+        };
+
+        $filename = 'primary-cases-' . date('Ymd-His') . '.csv';
+
+        return response()->stream($callback, 200, [
+            'Content-Type' => 'text/csv; charset=UTF-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(StoreCaseRegistrationRequest $request): JsonResponse
     {
+        // Block viewers from creating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot create cases.',
+            ], 403);
+        }
+
         $case = CaseRegistration::create($request->validated());
 
         // Log to archive
@@ -98,6 +175,14 @@ class CaseRegistrationController extends Controller
      */
     public function update(UpdateCaseRegistrationRequest $request, string $id): JsonResponse
     {
+        // Block viewers from updating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot update cases.',
+            ], 403);
+        }
+
         $case = CaseRegistration::findOrFail($id);
         $oldData = $case->toArray();
 
@@ -121,8 +206,16 @@ class CaseRegistrationController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
+        // Block viewers from deleting cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot delete cases.',
+            ], 403);
+        }
+
         $case = CaseRegistration::findOrFail($id);
         $oldData = $case->toArray();
 

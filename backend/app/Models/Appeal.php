@@ -19,6 +19,9 @@ class Appeal extends Model
         'appeal_court_number',
         'appeal_judgment',
         'appealed_by',
+        'sessionDate',
+        'judgementdate',
+        'judgementrecivedate',
         'assigned_case_registration_request_id',
         'status',
         'priority',
@@ -35,6 +38,9 @@ class Appeal extends Model
     {
         return [
             'appeal_date' => 'date',
+            'judgementdate' => 'date',
+            'judgementrecivedate' => 'date',
+            'judgementrecivedate' => 'date',
         ];
     }
 

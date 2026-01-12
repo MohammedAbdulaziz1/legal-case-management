@@ -5,10 +5,13 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Pagination from '../../components/ui/Pagination'
+import { USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { useAuth } from '../../context/AuthContext'
 
 const AppealCases = () => {
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const [cases, setCases] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
@@ -30,6 +33,7 @@ const AppealCases = () => {
       })
       if (response.data.success) {
         setCases(response.data.data || [])
+          console.log(cases);
         setTotalItems(response.data.meta?.total || 0)
       }
     } catch (err) {
@@ -76,9 +80,11 @@ const AppealCases = () => {
             إدارة وعرض جميع القضايا الاستئنافية وتفاصيل الأحكام والإجراءات المرتبطة بها.
           </p>
         </div>
-        <Button icon="add" onClick={() => navigate('/cases/appeal/new')}>
-          إضافة قضية جديدة
-        </Button>
+        {currentUser?.role !== USER_ROLES.VIEWER && (
+          <Button icon="add" onClick={() => navigate('/cases/appeal/new')}>
+            إضافة قضية جديدة
+          </Button>
+        )}
       </div>
 
       <Card className="p-4">
@@ -118,9 +124,11 @@ const AppealCases = () => {
           <div className="p-8 text-center">
             <span className="material-symbols-outlined text-slate-400 text-4xl mb-4">balance</span>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">لا توجد قضايا</p>
-            <Button variant="primary" icon="add" onClick={() => navigate('/cases/appeal/new')}>
-              إضافة قضية جديدة
-            </Button>
+            {currentUser?.role !== USER_ROLES.VIEWER && (
+              <Button variant="primary" icon="add" onClick={() => navigate('/cases/appeal/new')}>
+                إضافة قضية جديدة
+              </Button>
+            )}
           </div>
         ) : (
           <>
@@ -128,18 +136,21 @@ const AppealCases = () => {
               <table className="w-full text-sm text-right">
                 <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                   <tr>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم القضية</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">المدعي</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">المدعى عليه</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">موضوع القضية</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ التسجيل</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الحالة</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم الاستئناف</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الاستئناف</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من المستأنف</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap"> حكم الاستئناف</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {cases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.appealRequestId
+                    const appealJudgment = (caseItem.appealJudgment || '').toString().trim()
+                    const canTransferToSupremeCourt =
+                      appealJudgment === 'بتأييد الحكم' ||
+                      appealJudgment === 'الغاء الحكم'
                     return (
                       <tr 
                         key={caseId} 
@@ -149,39 +160,59 @@ const AppealCases = () => {
                         <td className="px-6 py-4 font-medium text-primary whitespace-nowrap hover:underline">
                           {caseItem.appealNumber || caseId}
                         </td>
-                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.plaintiff || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.defendant || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.subject || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.appealDate || caseItem.registrationDate)}</td>
-                        <td className="px-6 py-4 text-center">
-                          <StatusBadge status={caseItem.status || 'active'}>
-                            {caseItem.status === 'active' ? 'قيد النظر' : caseItem.status === 'pending' ? 'معلقة' : caseItem.status}
-                          </StatusBadge>
-                        </td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.registrationDate || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.appealJudgment || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.sessionDate || caseItem.sessionDate)}</td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => navigate(`/cases/appeal/${caseId}/edit`)}
-                              className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                            >
-                              <span className="material-symbols-outlined text-[20px]">edit</span>
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (window.confirm('هل أنت متأكد من حذف هذه القضية؟')) {
-                                  try {
-                                    await caseService.deleteAppealCase(caseId)
-                                    fetchCases()
-                                  } catch (err) {
-                                    alert('فشل في حذف القضية')
-                                  }
+                          {currentUser?.role !== USER_ROLES.VIEWER ? (
+                            <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => {
+                                  if (!canTransferToSupremeCourt) return
+                                  navigate(`/cases/supreme/new?appeal=${caseId}`)
+                                }}
+                                disabled={!canTransferToSupremeCourt}
+                                className={`p-2 rounded-lg transition-colors ${
+                                  canTransferToSupremeCourt
+                                    ? 'text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-500/10'
+                                    : 'text-slate-300 dark:text-slate-600 cursor-not-allowed opacity-60'
+                                }`}
+                                title={
+                                  canTransferToSupremeCourt
+                                    ? 'تحويل إلى المحكمة العليا'
+                                    : 'لا يمكن تحويل القضية إلى المحكمة العليا إلا بعد صدور حكم الاستئناف (بتأييد الحكم أو الغاء الحكم)'
                                 }
-                              }}
-                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-                            >
-                              <span className="material-symbols-outlined text-[20px]">delete</span>
-                            </button>
-                          </div>
+                              >
+                                <span className="material-symbols-outlined text-[20px]">gavel</span>
+                              </button>
+                              <button
+                                onClick={() => navigate(`/cases/appeal/${caseId}/edit`)}
+                                className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[20px]">edit</span>
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  if (window.confirm('هل أنت متأكد من حذف هذه القضية؟')) {
+                                    try {
+                                      await caseService.deleteAppealCase(caseId)
+                                      fetchCases()
+                                    } catch (err) {
+                                      alert('فشل في حذف القضية')
+                                    }
+                                  }
+                                }}
+                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[20px]">delete</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="text-center text-slate-400 dark:text-slate-500 text-sm">
+                              عرض فقط
+                            </div>
+                          )}
                         </td>
                       </tr>
                     )

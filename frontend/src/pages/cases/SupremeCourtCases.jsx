@@ -5,10 +5,13 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Pagination from '../../components/ui/Pagination'
+import { USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { useAuth } from '../../context/AuthContext'
 
 const SupremeCourtCases = () => {
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const [cases, setCases] = useState([])
   const [currentPage, setCurrentPage] = useState(1)
   const [totalItems, setTotalItems] = useState(0)
@@ -71,9 +74,11 @@ const SupremeCourtCases = () => {
             إدارة وعرض جميع قضايا المحكمة العليا وتفاصيل الأحكام والإجراءات المرتبطة بها.
           </p>
         </div>
-        <Button icon="add" onClick={() => navigate('/cases/supreme/new')}>
-          إضافة قضية جديدة
-        </Button>
+        {currentUser?.role !== USER_ROLES.VIEWER && (
+          <Button icon="add" onClick={() => navigate('/cases/supreme/new')}>
+            إضافة قضية جديدة
+          </Button>
+        )}
       </div>
 
       <Card className="overflow-hidden">
@@ -94,21 +99,23 @@ const SupremeCourtCases = () => {
           <div className="p-8 text-center">
             <span className="material-symbols-outlined text-slate-400 text-4xl mb-4">account_balance</span>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">لا توجد قضايا</p>
-            <Button variant="primary" icon="add" onClick={() => navigate('/cases/supreme/new')}>
-              إضافة قضية جديدة
-            </Button>
+            {currentUser?.role !== USER_ROLES.VIEWER && (
+              <Button variant="primary" icon="add" onClick={() => navigate('/cases/supreme/new')}>
+                إضافة قضية جديدة
+              </Button>
+            )}
           </div>
         ) : (
           <>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-right">
+              <table className="w-full text-sm text-right"> 
                 <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                   <tr>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم القضية</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">المدعي</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">المدعى عليه</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">موضوع القضية</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ التسجيل</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم العليا</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ العليا</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">حكم العليا</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من  قام بالرفع</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الحالة</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
                   </tr>
@@ -123,41 +130,47 @@ const SupremeCourtCases = () => {
                         onClick={() => navigate(`/cases/supreme/${caseId}`)}
                       >
                         <td className="px-6 py-4 font-medium text-primary whitespace-nowrap hover:underline">
-                          {caseItem.supremeCaseNumber || caseId}
+                          {caseItem.caseNumber || caseItem.supremeCaseNumber || caseId}
                         </td>
-                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.plaintiff || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.defendant || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.subject || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.supremeDate || caseItem.registrationDate)}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.date || caseItem.supremeDate || caseItem.registrationDate)}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.sessionDate)}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.supremeCourtJudgment || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge status={caseItem.status || 'active'}>
                             {caseItem.status === 'active' ? 'قيد النظر' : caseItem.status === 'pending' ? 'معلقة' : caseItem.status}
                           </StatusBadge>
                         </td>
                         <td className="px-6 py-4">
-                          <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => navigate(`/cases/supreme/${caseId}/edit`)}
-                              className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                            >
-                              <span className="material-symbols-outlined text-[20px]">edit</span>
-                            </button>
-                            <button
-                              onClick={async () => {
-                                if (window.confirm('هل أنت متأكد من حذف هذه القضية؟')) {
-                                  try {
-                                    await caseService.deleteSupremeCourtCase(caseId)
-                                    fetchCases()
-                                  } catch (err) {
-                                    alert('فشل في حذف القضية')
+                          {currentUser?.role !== USER_ROLES.VIEWER ? (
+                            <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
+                              <button
+                                onClick={() => navigate(`/cases/supreme/${caseId}/edit`)}
+                                className="p-2 text-slate-400 hover:text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[20px]">edit</span>
+                              </button>
+                              <button
+                                onClick={async () => {
+                                  if (window.confirm('هل أنت متأكد من حذف هذه القضية؟')) {
+                                    try {
+                                      await caseService.deleteSupremeCourtCase(caseId)
+                                      fetchCases()
+                                    } catch (err) {
+                                      alert('فشل في حذف القضية')
+                                    }
                                   }
-                                }
-                              }}
-                              className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
-                            >
-                              <span className="material-symbols-outlined text-[20px]">delete</span>
-                            </button>
-                          </div>
+                                }}
+                                className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-colors"
+                              >
+                                <span className="material-symbols-outlined text-[20px]">delete</span>
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="text-center text-slate-400 dark:text-slate-500 text-sm">
+                              عرض فقط
+                            </div>
+                          )}
                         </td>
                       </tr>
                     )

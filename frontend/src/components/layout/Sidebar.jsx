@@ -1,5 +1,6 @@
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { USER_ROLES } from '../../utils/constants'
 
 const Sidebar = () => {
   const { user } = useAuth()
@@ -68,6 +69,7 @@ const Sidebar = () => {
           <p className="px-4 text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">الإدارة</p>
         </div>
         
+        {user?.role === USER_ROLES.ADMIN && (
         <NavLink
           to="/users/permissions"
           className={({ isActive }) =>
@@ -81,6 +83,7 @@ const Sidebar = () => {
           <span className="material-symbols-outlined">admin_panel_settings</span>
           <span className="text-sm">إدارة الصلاحيات</span>
         </NavLink>
+        )}
         
         <NavLink
           to="/archive"

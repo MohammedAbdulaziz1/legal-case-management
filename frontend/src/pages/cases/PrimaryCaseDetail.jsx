@@ -4,12 +4,14 @@ import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
-import { CASE_STATUSES, CASE_STATUS_LABELS, JUDGMENT_TYPES, JUDGMENT_LABELS } from '../../utils/constants'
+import { CASE_STATUSES, CASE_STATUS_LABELS, JUDGMENT_TYPES, JUDGMENT_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { useAuth } from '../../context/AuthContext'
 
 const PrimaryCaseDetail = () => {
   const { id } = useParams()
   const navigate = useNavigate()
+  const { user: currentUser } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [caseData, setCaseData] = useState(null)
@@ -126,9 +128,11 @@ const PrimaryCaseDetail = () => {
           <Button variant="secondary" icon="arrow_back" onClick={() => navigate('/cases/primary')}>
             العودة للقائمة
           </Button>
-          <Button variant="primary" icon="edit" onClick={() => navigate(`/cases/primary/${id}/edit`)}>
-            تعديل القضية
-          </Button>
+          {currentUser?.role !== USER_ROLES.VIEWER && (
+            <Button variant="primary" icon="edit" onClick={() => navigate(`/cases/primary/${id}/edit`)}>
+              تعديل القضية
+            </Button>
+          )}
         </div>
       </div>
 
@@ -138,7 +142,7 @@ const PrimaryCaseDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  رقم القضية
+                  رقم الدعوى
                 </label>
                 <p className="text-base font-semibold text-slate-900 dark:text-white">
                   {caseData.caseNumber || 'غير محدد'}
@@ -146,7 +150,7 @@ const PrimaryCaseDetail = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  تاريخ التسجيل
+                  تاريخ الدعوى
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {formatDate(caseData.registrationDate || caseData.caseDate)}
@@ -168,7 +172,7 @@ const PrimaryCaseDetail = () => {
                   {caseData.title || 'غير محدد'}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   اسم الموكل
                 </label>
@@ -185,6 +189,43 @@ const PrimaryCaseDetail = () => {
                   <span className="material-symbols-outlined text-lg text-slate-400">person_cancel</span>
                   {caseData.opponent || 'غير محدد'}
                 </p>
+              </div> */}
+            </div>
+          </Card>
+
+          <Card title="أطراف القضية" icon="groups">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  اسم المدعي
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {caseData.plaintiff || 'غير محدد'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  المحامي الوكيل (المدعي)
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {caseData.plaintiffLawyer || caseData.plaintiff_lawyer || 'غير محدد'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  اسم المدعى عليه
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {caseData.defendant || 'غير محدد'}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  المحامي الوكيل (المدعى عليه)
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {caseData.defendantLawyer || caseData.defendant_lawyer || 'غير محدد'}
+                </p>
               </div>
             </div>
           </Card>
@@ -193,20 +234,20 @@ const PrimaryCaseDetail = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
-                  الدائرة القضائية
+                  المحكمة 
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {caseData.court || 'غير محدد'}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   رقم الدائرة القضائية
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {caseData.courtNumber || 'غير محدد'}
                 </p>
-              </div>
+              </div> */}
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   اسم القاضي
@@ -227,13 +268,29 @@ const PrimaryCaseDetail = () => {
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  تاريخ الحكم
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {formatDate(caseData.judgementdate)}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  تاريخ استلام الحكم
+                </label>
+                <p className="text-base text-slate-900 dark:text-white">
+                  {formatDate(caseData.judgementrecivedate)}
+                </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   تاريخ الجلسة القادمة
                 </label>
                 <p className="text-base text-slate-900 dark:text-white">
                   {caseData.nextSessionDate ? formatDate(caseData.nextSessionDate) : 'غير محدد'}
                 </p>
               </div>
-              <div>
+              {/* <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
                   حالة القضية
                 </label>
@@ -242,7 +299,7 @@ const PrimaryCaseDetail = () => {
                     {CASE_STATUS_LABELS[caseData.status] || 'قيد الإجراء'}
                   </StatusBadge>
                 </div>
-              </div>
+              </div> */}
               {caseData.notes && (
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
@@ -277,6 +334,17 @@ const PrimaryCaseDetail = () => {
                   <p className="text-xs text-slate-500 dark:text-slate-400">تاريخ الإنشاء</p>
                   <p className="text-sm font-semibold text-slate-900 dark:text-white">
                     {formatDate(caseData.createdAt || caseData.created_at)}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <div className="size-10 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 flex items-center justify-center">
+                  <span className="material-symbols-outlined">priority_high</span>
+                </div>
+                <div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">الأولوية</p>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                    {caseData.priority || 'غير محدد'}
                   </p>
                 </div>
               </div>

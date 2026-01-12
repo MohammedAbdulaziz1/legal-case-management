@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
+import DocumentsSection from '../../components/documents/DocumentsSection'
 import { dashboardService } from '../../services/dashboardService'
 
 const Dashboard = () => {
@@ -181,6 +182,9 @@ const Dashboard = () => {
           ))}
         </div>
       )}
+
+      {/* Documents Section */}
+      <DocumentsSection />
     </Layout>
   )
 }

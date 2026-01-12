@@ -1,3 +1,16 @@
+export const APPEALED_PARTIES = {
+  TGA:1 ,
+  COMPANY: 2
+  
+}
+
+
+export const APPEALED_PARTIES_LABLES = {
+  [APPEALED_PARTIES.COMPANY]: 'الشركة',
+  [APPEALED_PARTIES.TGA]: 'هيئة النقل'
+  
+}
+
 export const CASE_STATUSES = {
   ACTIVE: 'active',
   PENDING: 'pending',
@@ -15,28 +28,38 @@ export const CASE_STATUS_LABELS = {
 }
 
 export const JUDGMENT_TYPES = {
-  FOR_PLAINTIFF: 1,
-  AGAINST_PLAINTIFF: 2,
+  CANCELED: 1,
+  REJECTED: 2,
+  POSTPONED:3,
   PENDING: null
 }
 
 export const JUDGMENT_LABELS = {
-  [JUDGMENT_TYPES.FOR_PLAINTIFF]: 'لصالح المدعي',
-  [JUDGMENT_TYPES.AGAINST_PLAINTIFF]: 'ضد المدعي',
-  [JUDGMENT_TYPES.PENDING]: 'قيد النظر'
+  [JUDGMENT_TYPES.CANCELED]: 'الغاء القرار',
+  [JUDGMENT_TYPES.REJECTED]: 'رفض الدعوة',
+  [JUDGMENT_TYPES.POSTPONED]: 'تاجيل الدعوة',
+  [JUDGMENT_TYPES.PENDING]: 'قيد المعالجة'
 }
+
+// export const JUDGMENT_LABELS = {
+//   [JUDGMENT_TYPES.FOR_PLAINTIFF]: 'لصالح المدعي',
+//   [JUDGMENT_TYPES.AGAINST_PLAINTIFF]: 'ضد المدعي',
+//   [JUDGMENT_TYPES.PENDING]: 'قيد النظر'
+// }
 
 export const USER_ROLES = {
   ADMIN: 'admin',
-  LAWYER: 'lawyer',
-  TRAINEE: 'trainee',
-  CLERK: 'clerk'
+  USER: 'user',
+  VIEWER: 'viewer'
 }
 
 export const USER_ROLE_LABELS = {
   [USER_ROLES.ADMIN]: 'مدير نظام',
-  [USER_ROLES.LAWYER]: 'محامي أول',
-  [USER_ROLES.TRAINEE]: 'محامي متدرب',
-  [USER_ROLES.CLERK]: 'كاتب عدل'
+  [USER_ROLES.USER]: 'مستخدم',
+  [USER_ROLES.VIEWER]: 'مشاهد',
+  // Map old roles to user for backward compatibility
+  'lawyer': 'مستخدم',
+  'trainee': 'مستخدم',
+  'clerk': 'مستخدم'
 }
 

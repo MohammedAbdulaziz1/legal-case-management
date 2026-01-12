@@ -17,7 +17,22 @@ class StoreUserRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'unique:users,email'],
             'password' => ['required', 'string', 'min:8'],
-            'role' => ['nullable', 'string', 'in:admin,lawyer,trainee,clerk'],
+            'role' => ['required', 'string', 'in:admin,user,viewer'],
         ];
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        // Set default role to 'user' if not provided or empty
+        $role = $this->input('role');
+        if (!$this->has('role') || $role === null || $role === '' || trim($role) === '') {
+            $this->merge(['role' => 'user']);
+        } else {
+            // Ensure role is trimmed
+            $this->merge(['role' => trim($role)]);
+        }
     }
 }

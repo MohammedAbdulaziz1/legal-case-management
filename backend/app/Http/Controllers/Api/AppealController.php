@@ -10,6 +10,7 @@ use App\Models\Appeal;
 use App\Services\ArchiveService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class AppealController extends Controller
 {
@@ -45,7 +46,7 @@ class AppealController extends Controller
 
         $perPage = $request->get('per_page', 10);
         $appeals = $query->orderBy('created_at', 'desc')->paginate($perPage);
-
+            
         return response()->json([
             'success' => true,
             'data' => AppealResource::collection($appeals->items()),
@@ -63,7 +64,16 @@ class AppealController extends Controller
      */
     public function store(StoreAppealRequest $request): JsonResponse
     {
+        // Block viewers from creating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot create cases.',
+            ], 403);
+        }
+
         $appeal = Appeal::create($request->validated());
+       
 
         // Log to archive
         $this->archiveService->logCaseChange(
@@ -98,8 +108,17 @@ class AppealController extends Controller
      */
     public function update(UpdateAppealRequest $request, string $id): JsonResponse
     {
+        // Block viewers from updating cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot update cases.',
+            ], 403);
+        }
+
         $appeal = Appeal::findOrFail($id);
         $oldData = $appeal->toArray();
+        Log::info($oldData);
 
         $appeal->update($request->validated());
 
@@ -121,8 +140,16 @@ class AppealController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id): JsonResponse
+    public function destroy(Request $request, string $id): JsonResponse
     {
+        // Block viewers from deleting cases
+        if ($request->user()->role === 'viewer') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Unauthorized. Viewers cannot delete cases.',
+            ], 403);
+        }
+
         $appeal = Appeal::findOrFail($id);
         $oldData = $appeal->toArray();
 

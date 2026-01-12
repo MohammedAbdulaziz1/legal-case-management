@@ -5,10 +5,12 @@ use App\Http\Controllers\Api\ArchiveController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CaseRegistrationController;
 use App\Http\Controllers\Api\DashboardController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\SupremeCourtController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
+// smiple comment
 // Public routes
 Route::post('/auth/login', [AuthController::class, 'login']);
 
@@ -20,6 +22,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/refresh', [AuthController::class, 'refresh']);
 
     // Primary Cases
+    Route::get('/cases/primary/export', [CaseRegistrationController::class, 'export']);
     Route::apiResource('cases/primary', CaseRegistrationController::class);
 
     // Appeal Cases
@@ -41,4 +44,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Dashboard
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
+
+    // Documents
+    Route::apiResource('documents', DocumentController::class);
+    Route::get('/documents/{document}/download', [DocumentController::class, 'download']);
 });

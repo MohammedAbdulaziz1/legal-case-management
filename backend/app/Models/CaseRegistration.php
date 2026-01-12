@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class CaseRegistration extends Model
 {
@@ -21,7 +21,14 @@ class CaseRegistration extends Model
         'title',
         'client',
         'opponent',
+        'plaintiff',
+        'plaintiffLawyer',
+        'defendant',
+        'defendantLawyer',
+        'court',
         'judge',
+        'judgementdate',
+        'judgementrecivedate',
         'next_session_date',
         'status',
         'notes',
@@ -33,14 +40,19 @@ class CaseRegistration extends Model
             'case_date' => 'date',
             'session_date' => 'date',
             'next_session_date' => 'date',
+            'judgementrecivedate'  => 'date',
+            'judgementdate'  => 'date',
         ];
     }
 
     /**
      * Get the appeals for the case registration.
      */
-    public function appeals(): HasMany
-    {
-        return $this->hasMany(Appeal::class, 'assigned_case_registration_request_id');
-    }
+        public function appeal(): HasOne
+        {
+            return $this->hasOne(
+                Appeal::class,
+                'assigned_case_registration_request_id'
+            );
+        }
 }
