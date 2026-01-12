@@ -265,6 +265,7 @@ const SupremeCourtCaseEdit = () => {
                   }}
                   error={errors.registrationDate}
                   required
+                  hijriOnly={isNew}
                 />
                 <Select
                   label="من قام بالرفع للمحكمة العليا"
@@ -290,6 +291,7 @@ const SupremeCourtCaseEdit = () => {
                   }}
                   error={errors.sessionDate}
                   required
+                  hijriOnly={isNew}
                 />
                  <Input
                   label=" حكم  العليا"
@@ -306,6 +308,7 @@ const SupremeCourtCaseEdit = () => {
                   }}
                   error={errors.judgementdate}
                   required
+                  hijriOnly={isNew}
                 />
                 
                  <DualDateInput
@@ -317,6 +320,7 @@ const SupremeCourtCaseEdit = () => {
                   }}
                   error={errors.judgementrecivedate}
                   required
+                  hijriOnly={isNew}
                 />
                 <Input  
                   label="المحكمة العليا"

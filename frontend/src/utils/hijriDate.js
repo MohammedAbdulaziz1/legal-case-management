@@ -42,3 +42,52 @@ export const hijriStringToIso = (hijriStr) => {
     return null
   }
 }
+
+// Format date in Hijri format for display (e.g., "1445-06-15" or Date object)
+export const formatDateHijri = (dateInput) => {
+  if (!dateInput) return ''
+  
+  try {
+    let isoDate = ''
+    
+    // Handle different input types
+    if (typeof dateInput === 'string') {
+      // Check if it's already in ISO format (YYYY-MM-DD)
+      if (isIsoDate(dateInput)) {
+        isoDate = dateInput
+      } else {
+        // Try to parse as Date and convert to ISO
+        const date = new Date(dateInput)
+        if (!isNaN(date.getTime())) {
+          const year = date.getFullYear()
+          const month = String(date.getMonth() + 1).padStart(2, '0')
+          const day = String(date.getDate()).padStart(2, '0')
+          isoDate = `${year}-${month}-${day}`
+        } else {
+          return dateInput // Return as-is if can't parse
+        }
+      }
+    } else if (dateInput instanceof Date) {
+      const year = dateInput.getFullYear()
+      const month = String(dateInput.getMonth() + 1).padStart(2, '0')
+      const day = String(dateInput.getDate()).padStart(2, '0')
+      isoDate = `${year}-${month}-${day}`
+    } else {
+      return String(dateInput)
+    }
+
+    // Convert ISO to Hijri
+    if (isoDate && isIsoDate(isoDate)) {
+      const hijriStr = isoToHijriString(isoDate)
+      if (hijriStr) {
+        // Format as YYYY/MM/DD for display
+        return hijriStr.replace(/-/g, '/')
+      }
+    }
+    
+    return ''
+  } catch (error) {
+    console.error('Error formatting Hijri date:', error)
+    return String(dateInput)
+  }
+}

@@ -33,6 +33,7 @@ class StoreCaseRegistrationRequest extends FormRequest
             'status' => ['nullable', 'string', 'in:active,pending,judgment,closed,postponed'],
             'notes' => ['nullable', 'string'],
             'priority' => ['nullable', 'string'],
+            'court_number' => ['nullable', 'integer'],
 
         ];
     }

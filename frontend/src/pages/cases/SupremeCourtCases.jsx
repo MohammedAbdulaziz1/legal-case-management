@@ -8,6 +8,7 @@ import Pagination from '../../components/ui/Pagination'
 import { USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
+import { formatDateHijri } from '../../utils/hijriDate'
 
 const SupremeCourtCases = () => {
   const navigate = useNavigate()
@@ -132,8 +133,8 @@ const SupremeCourtCases = () => {
                         <td className="px-6 py-4 font-medium text-primary whitespace-nowrap hover:underline">
                           {caseItem.caseNumber || caseItem.supremeCaseNumber || caseId}
                         </td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.date || caseItem.supremeDate || caseItem.registrationDate)}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.sessionDate)}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.date || caseItem.supremeDate || caseItem.registrationDate) || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.sessionDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.supremeCourtJudgment || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">

@@ -276,6 +276,7 @@ const AppealCaseEdit = () => {
                   }}
                   error={errors.registrationDate}
                   required
+                  hijriOnly={isNew}
                 />
                 {/* <Input
                   label="رقم الدائرة القضائية"
@@ -325,6 +326,7 @@ const AppealCaseEdit = () => {
                   }}
                   error={errors.sessionDate}
                   required
+                  hijriOnly={isNew}
                 />
                  <DualDateInput
                   label="تاريخ الحكم"
@@ -335,6 +337,7 @@ const AppealCaseEdit = () => {
                   }}
                   error={errors.judgementdate}
                   required
+                  hijriOnly={isNew}
                 />
                 
                  <DualDateInput
@@ -346,6 +349,7 @@ const AppealCaseEdit = () => {
                   }}
                   error={errors.judgementrecivedate}
                   required
+                  hijriOnly={isNew}
                 />
                 
               

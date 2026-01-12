@@ -30,7 +30,7 @@ const PrimaryCaseEdit = () => {
     defendant:'',
     defendantLawyer:'',
     court: '',
-    // courtNumber: 1,
+    courtNumber: 1,
     cour:'',
     judge: '',
     firstInstanceJudgment: 'قيد المعالجة',
@@ -229,6 +229,7 @@ const PrimaryCaseEdit = () => {
                   value={formData.registrationDate}
                   onChange={(val) => handleChange('registrationDate', val)}
                   required
+                  hijriOnly={isNew}
                 />
                 <DualDateInput
                   label="تاريخ الجلسة"
@@ -239,6 +240,7 @@ const PrimaryCaseEdit = () => {
                   }}
                   error={errors.sessionDate}
                   required
+                  hijriOnly={isNew}
                 />
                
                 {/* <Input
@@ -341,6 +343,7 @@ const PrimaryCaseEdit = () => {
                     if (errors.judgementdate) setErrors(prev => ({ ...prev, judgementdate: '' }))
                   }}
                   error={errors.judgementdate}
+                  hijriOnly={isNew}
                 />
                 <DualDateInput
                   label="تاريخ استلام الحكم"
@@ -350,6 +353,7 @@ const PrimaryCaseEdit = () => {
                     if (errors.judgementrecivedate) setErrors(prev => ({ ...prev, judgementrecivedate: '' }))
                   }}
                   error={errors.judgementrecivedate}
+                  hijriOnly={isNew}
                 />
                 {/* <Input
                   label="تاريخ الجلسة القادمة"

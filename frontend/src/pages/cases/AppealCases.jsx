@@ -8,6 +8,7 @@ import Pagination from '../../components/ui/Pagination'
 import { USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
+import { formatDateHijri } from '../../utils/hijriDate'
 
 const AppealCases = () => {
   const navigate = useNavigate()
@@ -160,10 +161,10 @@ const AppealCases = () => {
                         <td className="px-6 py-4 font-medium text-primary whitespace-nowrap hover:underline">
                           {caseItem.appealNumber || caseId}
                         </td>
-                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.registrationDate || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{formatDateHijri(caseItem.registrationDate || caseItem.appealDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.appealJudgment || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.sessionDate || caseItem.sessionDate)}</td>
+                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.sessionDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4">
                           {currentUser?.role !== USER_ROLES.VIEWER ? (
                             <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
