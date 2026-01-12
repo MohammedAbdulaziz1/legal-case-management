@@ -44,8 +44,16 @@ class AppealController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Sorting
+        $allowedSorts = ['appeal_number', 'appeal_date', 'sessionDate', 'created_at', 'appealed_by'];
+        $sortBy = $request->get('sort_by', 'created_at');
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $order = strtolower($request->get('order', 'asc')) === 'asc' ? 'asc' : 'desc';
+
         $perPage = $request->get('per_page', 10);
-        $appeals = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $appeals = $query->orderBy($sortBy, $order)->paginate($perPage);
             
         return response()->json([
             'success' => true,

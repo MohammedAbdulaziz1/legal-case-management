@@ -23,7 +23,7 @@ const PrimaryCases = () => {
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState({})
   const [sortBy, setSortBy] = useState('created_at')
-  const [sortOrder, setSortOrder] = useState('desc')
+  const [sortOrder, setSortOrder] = useState('asc')
 
   useEffect(() => {
     fetchCases()
@@ -239,23 +239,12 @@ const PrimaryCases = () => {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden lg:block mx-1"></div>
-            <Button variant="secondary" size="sm" icon="filter_list" onClick={() => {
-              const status = window.prompt('أدخل حالة للتصفية (مثال: active, closed) أو اترك فارغاً لإلغاء:')
-              if (status === null) return
-              setFilters(prev => ({ ...prev, status: status || undefined }))
-              setCurrentPage(1)
-            }}>
-              تصفية
-            </Button>
             <Button variant="secondary" size="sm" icon="sort" onClick={() => {
               setSortBy(prev => prev || 'created_at')
               setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))
               setCurrentPage(1)
             }}>
               ترتيب ({sortOrder === 'asc' ? 'صاعد' : 'تنازلي'})
-            </Button>
-            <Button variant="secondary" size="sm" icon="download" onClick={handleExport}>
-              تصدير
             </Button>
           </div>
         </div>

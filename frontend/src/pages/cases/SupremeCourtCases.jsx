@@ -19,10 +19,12 @@ const SupremeCourtCases = () => {
   const [itemsPerPage] = useState(10)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [sortBy, setSortBy] = useState('created_at')
+  const [sortOrder, setSortOrder] = useState('asc')
 
   useEffect(() => {
     fetchCases()
-  }, [currentPage])
+  }, [currentPage, sortBy, sortOrder])
 
   const fetchCases = async () => {
     try {
@@ -30,7 +32,9 @@ const SupremeCourtCases = () => {
       setError(null)
       const response = await caseService.getSupremeCourtCases({
         page: currentPage,
-        per_page: itemsPerPage
+        per_page: itemsPerPage,
+        sort_by: sortBy,
+        order: sortOrder
       })
       if (response.data.success) {
         setCases(response.data.data || [])
@@ -81,6 +85,21 @@ const SupremeCourtCases = () => {
           </Button>
         )}
       </div>
+
+      <Card className="p-4 mb-6">
+        <div className="flex flex-col lg:flex-row gap-4 justify-end">
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden lg:block mx-1"></div>
+            <Button variant="secondary" size="sm" icon="sort" onClick={() => {
+              setSortBy(prev => prev || 'created_at')
+              setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))
+              setCurrentPage(1)
+            }}>
+              ترتيب ({sortOrder === 'asc' ? 'صاعد' : 'تنازلي'})
+            </Button>
+          </div>
+        </div>
+      </Card>
 
       <Card className="overflow-hidden">
         {loading ? (
