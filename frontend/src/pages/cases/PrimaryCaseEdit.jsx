@@ -312,7 +312,7 @@ const PrimaryCaseEdit = () => {
                   label="المحكمة"
                   value={formData.court}
                   onChange={(e) => handleChange('court', e.target.value)}
-                  required
+                  
                 />
                 <Input
                   label="اسم القاضي"
@@ -327,7 +327,7 @@ const PrimaryCaseEdit = () => {
                     if (errors.firstInstanceJudgment) setErrors(prev => ({ ...prev, firstInstanceJudgment: '' }))
                   }}
                   error={errors.firstInstanceJudgment}
-                  required
+                  
                   options={[
                     { value: 'الغاء القرار', label: 'الغاء القرار' },
                     { value: 'رفض الدعوة', label: 'رفض الدعوة' },

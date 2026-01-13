@@ -113,7 +113,7 @@ export const caseService = {
       subject: data.subject,
       judge: data.judge,
     }
-        console.log(backendData);
+        
 
     // Remove undefined values
     Object.keys(backendData).forEach(key => {

@@ -31,6 +31,8 @@ export const JUDGMENT_TYPES = {
   CANCELED: 1,
   REJECTED: 2,
   POSTPONED:3,
+  ACCEPTED: 4,
+  
   PENDING: null
 }
 
@@ -41,11 +43,12 @@ export const JUDGMENT_LABELS = {
   [JUDGMENT_TYPES.PENDING]: 'قيد المعالجة'
 }
 
-// export const JUDGMENT_LABELS = {
-//   [JUDGMENT_TYPES.FOR_PLAINTIFF]: 'لصالح المدعي',
-//   [JUDGMENT_TYPES.AGAINST_PLAINTIFF]: 'ضد المدعي',
-//   [JUDGMENT_TYPES.PENDING]: 'قيد النظر'
-// }
+export const JUDGMENT_LABELS_APPEAL = {
+
+  [JUDGMENT_TYPES.ACCEPTED]: 'بتأييد الحكم',
+  [JUDGMENT_TYPES.CANCELED]: 'الغاء الحكم',
+  [JUDGMENT_TYPES.PENDING]: 'قيد المعالجة'
+}
 
 export const USER_ROLES = {
   ADMIN: 'admin',
