@@ -5,6 +5,7 @@ import Card from '../../components/common/Card'
 import Input from '../../components/common/Input'
 import DualDateInput from '../../components/common/DualDateInput'
 import Select from '../../components/common/Select'
+import SearchableSelect from '../../components/common/SearchableSelect'
 import Button from '../../components/common/Button'
 import { APPEALED_PARTIES_LABLES, CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
@@ -76,7 +77,8 @@ const AppealCaseEdit = () => {
 
   const fetchPrimaryCases = async () => {
     try {
-      const response = await caseService.getPrimaryCases({ per_page: 100 })
+      // Fetch all primary cases for the searchable dropdown
+      const response = await caseService.getPrimaryCases({ per_page: 1000 })
       if (response.data.success) {
         setPrimaryCases(response.data.data || [])
         // Check if there's a primary case ID in query params
@@ -237,7 +239,7 @@ const AppealCaseEdit = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {isNew && (
                   <div className="md:col-span-2">
-                    <Select
+                    <SearchableSelect
                       label="القضية الابتدائية المرتبطة"
                       value={formData.caseRegistrationId}
                       onChange={(e) => {
@@ -246,6 +248,7 @@ const AppealCaseEdit = () => {
                       }}
                       error={errors.caseRegistrationId}
                       required
+                      placeholder="ابحث أو اختر القضية الابتدائية..."
                       options={[
                         { value: '', label: 'اختر القضية الابتدائية' },
                         ...primaryCases.map(caseItem => ({
