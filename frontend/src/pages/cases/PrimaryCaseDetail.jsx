@@ -166,10 +166,27 @@ const PrimaryCaseDetail = () => {
   }
 
   const getSessionSummary = (list) => {
+    const toLocalDate = (value) => {
+      if (!value) return null
+      if (typeof value === 'string') {
+        const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+        if (m) {
+          const y = parseInt(m[1], 10)
+          const mo = parseInt(m[2], 10)
+          const d = parseInt(m[3], 10)
+          const dt = new Date(y, mo - 1, d)
+          if (!Number.isNaN(dt.getTime())) return dt
+        }
+      }
+      const dt = new Date(value)
+      if (Number.isNaN(dt.getTime())) return null
+      return dt
+    }
+
     const items = (list || [])
       .map((s) => {
-        const d = s?.sessionDate ? new Date(s.sessionDate) : null
-        if (!d || Number.isNaN(d.getTime())) return null
+        const d = toLocalDate(s?.sessionDate)
+        if (!d) return null
         return { date: d, sessionDate: s.sessionDate }
       })
       .filter(Boolean)
