@@ -34,10 +34,6 @@ export const validateCaseForm = (formData) => {
     errors.registrationDate = 'تاريخ التسجيل مطلوب'
   }
 
-  if (!validateRequired(formData.sessionDate)) {
-    errors.sessionDate = 'تاريخ الجلسة مطلوب'
-  }
-
   // if (!formData.courtNumber || formData.courtNumber < 1) {
   //   errors.courtNumber = 'رقم الدائرة القضائية مطلوب'
   // }

@@ -20,7 +20,6 @@ const SupremeCourtCaseEdit = () => {
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
-    sessionDate: '',
     supremeCourtJudgment: '',
     judgementdate: '',
     judgementrecivedate: '',
@@ -99,7 +98,6 @@ const SupremeCourtCaseEdit = () => {
         setFormData({
           caseNumber: caseData.caseNumber?.toString() || caseData.supremeCaseNumber?.toString() || '',
           registrationDate: caseData.date || caseData.supremeDate || '',
-          sessionDate: normalizeDateInputValue(caseData.sessionDate),
           supremeCourtJudgment: caseData.supremeCourtJudgment || '',
           judgementdate: normalizeDateInputValue(caseData.judgementdate),
           judgementrecivedate: normalizeDateInputValue(caseData.judgementrecivedate),
@@ -151,7 +149,6 @@ const SupremeCourtCaseEdit = () => {
     const validationErrors = {}
     if (!formData.caseNumber) validationErrors.caseNumber = 'رقم القضية مطلوب'
     if (!formData.registrationDate) validationErrors.registrationDate = 'تاريخ التسجيل مطلوب'
-    if (!formData.sessionDate) validationErrors.sessionDate = 'تاريخ الجلسة مطلوب'
     if (!formData.judgementdate) validationErrors.judgementdate = 'تاريخ الحكم مطلوب'
     if (!formData.judgementrecivedate) validationErrors.judgementrecivedate = 'تاريخ استلام الحكم مطلوب'
     if (!formData.appealedBy) validationErrors.appealedBy = 'من قام بالرفع مطلوب'

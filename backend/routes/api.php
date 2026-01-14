@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AppealController;
 use App\Http\Controllers\Api\ArchiveController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CaseRegistrationController;
+use App\Http\Controllers\Api\CaseSessionController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\SupremeCourtController;
@@ -30,6 +31,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Supreme Court Cases
     Route::apiResource('cases/supreme', SupremeCourtController::class);
+
+    // Case Sessions (normalized)
+    Route::apiResource('sessions', CaseSessionController::class);
 
     // Users
     Route::apiResource('users', UserController::class);

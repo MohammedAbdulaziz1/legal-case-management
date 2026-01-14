@@ -45,7 +45,7 @@ class AppealController extends Controller
         }
 
         // Sorting
-        $allowedSorts = ['appeal_number', 'appeal_date', 'sessionDate', 'created_at', 'appealed_by'];
+        $allowedSorts = ['appeal_number', 'appeal_date', 'created_at', 'appealed_by'];
         $sortBy = $request->get('sort_by', 'created_at');
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'created_at';

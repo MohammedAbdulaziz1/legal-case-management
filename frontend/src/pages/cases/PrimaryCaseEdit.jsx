@@ -21,7 +21,6 @@ const PrimaryCaseEdit = () => {
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
-    sessionDate: '',
     title: '',
     // client: '',
     // opponent: '',
@@ -36,7 +35,6 @@ const PrimaryCaseEdit = () => {
     firstInstanceJudgment: 'قيد المعالجة',
     judgementdate:'',
     judgementrecivedate:'',
-    nextSessionDate: '',
     // status: CASE_STATUSES.ACTIVE,
     notes: '',
     priority:'',
@@ -68,7 +66,6 @@ const PrimaryCaseEdit = () => {
         setFormData({
           caseNumber: caseData.caseNumber?.toString() || '',
           registrationDate: caseData.registrationDate || caseData.caseDate || '',
-          sessionDate: caseData.sessionDate || caseData.registrationDate || '',
           title: caseData.title || '',
           client: caseData.client || '',
           opponent: caseData.opponent || '',
@@ -76,7 +73,6 @@ const PrimaryCaseEdit = () => {
           courtNumber: caseData.courtNumber || 1,
           judge: caseData.judge || '',
           firstInstanceJudgment: caseData.firstInstanceJudgment || 'قيد المعالجة',
-          nextSessionDate: caseData.nextSessionDate || '',
           status: caseData.status || CASE_STATUSES.ACTIVE,
           notes: caseData.notes || ''
         })
@@ -135,10 +131,9 @@ const PrimaryCaseEdit = () => {
           // Map backend field names to frontend field names
           const frontendKey = key === 'case_number' ? 'caseNumber' :
                              key === 'case_date' ? 'registrationDate' :
-                             key === 'session_date' ? 'sessionDate' :
                              key === 'court_number' ? 'courtNumber' :
                              key === 'first_instance_judgment' ? 'firstInstanceJudgment' :
-                             key === 'next_session_date' ? 'nextSessionDate' : key
+                             key
           formattedErrors[frontendKey] = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key]
         })
         setErrors(formattedErrors)
@@ -228,17 +223,6 @@ const PrimaryCaseEdit = () => {
                   label="تاريخ الدعوى"
                   value={formData.registrationDate}
                   onChange={(val) => handleChange('registrationDate', val)}
-                  required
-                  hijriOnly={isNew}
-                />
-                <DualDateInput
-                  label="تاريخ الجلسة"
-                  value={formData.sessionDate}
-                  onChange={(val) => {
-                    handleChange('sessionDate', val)
-                    if (errors.sessionDate) setErrors(prev => ({ ...prev, sessionDate: '' }))
-                  }}
-                  error={errors.sessionDate}
                   required
                   hijriOnly={isNew}
                 />

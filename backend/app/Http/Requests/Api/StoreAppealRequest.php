@@ -16,7 +16,6 @@ class StoreAppealRequest extends FormRequest
         return [
             'appeal_number' => ['required', 'integer'],
             'appeal_date' => ['required', 'date'],
-            'sessionDate' => ['required', 'date'],
             'judgementdate' => ['required', 'date'],
             'judgementrecivedate' => ['required', 'date'],
             'appeal_court_number' => ['required', 'integer'],

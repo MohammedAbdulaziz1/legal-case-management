@@ -24,7 +24,6 @@ const AppealCaseEdit = () => {
     appealJudgment: 'قيد المعالجة',
     judgementdate: '',
     judgementrecivedate: '',
-    sessionDate: '',
     appealedBy: '',
     caseRegistrationId: '',
     court: '',
@@ -109,7 +108,6 @@ const AppealCaseEdit = () => {
           registrationDate: caseData.registrationDate || caseData.appealDate || '',
           courtNumber: caseData.courtNumber || 1,
           appealJudgment: caseData.appealJudgment || 'قيد النظر',
-          sessionDate:caseData.sessionDate || '',
           judgementdate: normalizeDateInputValue(caseData.judgementdate),
           judgementrecivedate: normalizeDateInputValue(caseData.judgementrecivedate),
           appealedBy: caseData.appealedBy || '',
@@ -163,7 +161,6 @@ const AppealCaseEdit = () => {
     if (!formData.courtNumber || formData.courtNumber < 1) validationErrors.courtNumber = 'رقم الدائرة القضائية مطلوب'
     if (!formData.appealJudgment) validationErrors.appealJudgment = 'حكم الاستئناف مطلوب'
     if (!formData.appealedBy) validationErrors.appealedBy = 'المستأنف مطلوب'
-    if (!formData.sessionDate) validationErrors.sessionDate = 'تاريخ الجلسة مطلوب'
     if (!formData.judgementdate) validationErrors.judgementdate = 'تاريخ الحكم مطلوب'
     if (!formData.judgementrecivedate) validationErrors.judgementrecivedate = 'تاريخ استلام الحكم مطلوب'
     if (isNew && !formData.caseRegistrationId) validationErrors.caseRegistrationId = 'القضية الابتدائية مطلوبة'

@@ -22,7 +22,6 @@ class AppealResource extends JsonResource
             'judge' => $this->judge,
             'judgementdate' => $this->judgementdate,
             'judgementrecivedate' => $this->judgementrecivedate, 
-            'sessionDate' => $this->sessionDate,
             'plaintiff' => $this->plaintiff,
             'plaintiffLawyer' => $this->plaintiff_lawyer,
             'defendant' => $this->defendant,
