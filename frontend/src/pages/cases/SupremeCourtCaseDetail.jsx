@@ -4,6 +4,7 @@ import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
+import CaseDocuments from '../../components/cases/CaseDocuments'
 import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
@@ -311,6 +312,8 @@ const SupremeCourtCaseDetail = () => {
               </div>
             </div>
           </Card>
+
+          <CaseDocuments caseType="supreme" caseId={id} />
         </div>
       </div>
     </Layout>

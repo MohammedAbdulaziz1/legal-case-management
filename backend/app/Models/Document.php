@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Support\Facades\Storage;
 
 class Document extends Model
@@ -16,6 +17,8 @@ class Document extends Model
         'mime_type',
         'description',
         'uploaded_by',
+        'documentable_id',
+        'documentable_type',
     ];
 
     /**
@@ -24,6 +27,14 @@ class Document extends Model
     public function uploader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+    /**
+     * Get the parent documentable model (CaseRegistration, Appeal, SupremeCourt).
+     */
+    public function documentable(): MorphTo
+    {
+        return $this->morphTo();
     }
 
     /**

@@ -8,16 +8,20 @@ use App\Http\Requests\Api\UpdateSupremeCourtRequest;
 use App\Http\Resources\SupremeCourtResource;
 use App\Models\SupremeCourt;
 use App\Services\ArchiveService;
+use App\Services\DocumentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class SupremeCourtController extends Controller
 {
     protected ArchiveService $archiveService;
+    protected DocumentService $documentService;
 
-    public function __construct(ArchiveService $archiveService)
+    public function __construct(ArchiveService $archiveService, DocumentService $documentService)
     {
         $this->archiveService = $archiveService;
+        $this->documentService = $documentService;
     }
 
     /**
@@ -75,6 +79,23 @@ class SupremeCourtController extends Controller
         }
 
         $case = SupremeCourt::create($request->validated());
+
+        // Copy documents from linked appeal case to this supreme court case
+        if ($case->appeal_request_id) {
+            try {
+                $this->documentService->copyFromAppealToSupreme(
+                    $case->appeal_request_id,
+                    $case->supreme_request_id
+                );
+            } catch (\Exception $e) {
+                // Log error but don't fail the supreme court case creation
+                Log::error('Failed to copy documents from appeal to supreme court case', [
+                    'appeal_case_id' => $case->appeal_request_id,
+                    'supreme_case_id' => $case->supreme_request_id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
 
         // Log to archive
         $this->archiveService->logCaseChange(

@@ -8,6 +8,7 @@ use App\Http\Requests\Api\UpdateAppealRequest;
 use App\Http\Resources\AppealResource;
 use App\Models\Appeal;
 use App\Services\ArchiveService;
+use App\Services\DocumentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -15,10 +16,12 @@ use Illuminate\Support\Facades\Log;
 class AppealController extends Controller
 {
     protected ArchiveService $archiveService;
+    protected DocumentService $documentService;
 
-    public function __construct(ArchiveService $archiveService)
+    public function __construct(ArchiveService $archiveService, DocumentService $documentService)
     {
         $this->archiveService = $archiveService;
+        $this->documentService = $documentService;
     }
 
     /**
@@ -82,6 +85,22 @@ class AppealController extends Controller
 
         $appeal = Appeal::create($request->validated());
        
+        // Copy documents from linked primary case to this appeal case
+        if ($appeal->assigned_case_registration_request_id) {
+            try {
+                $this->documentService->copyFromPrimaryToAppeal(
+                    $appeal->assigned_case_registration_request_id,
+                    $appeal->appeal_request_id
+                );
+            } catch (\Exception $e) {
+                // Log error but don't fail the appeal creation
+                Log::error('Failed to copy documents from primary to appeal case', [
+                    'primary_case_id' => $appeal->assigned_case_registration_request_id,
+                    'appeal_case_id' => $appeal->appeal_request_id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
 
         // Log to archive
         $this->archiveService->logCaseChange(

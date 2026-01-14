@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
@@ -7,6 +7,7 @@ import DualDateInput from '../../components/common/DualDateInput'
 import Select from '../../components/common/Select'
 import SearchableSelect from '../../components/common/SearchableSelect'
 import Button from '../../components/common/Button'
+import CaseDocuments from '../../components/cases/CaseDocuments'
 import { APPEALED_PARTIES_LABLES, CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
@@ -17,6 +18,7 @@ const SupremeCourtCaseEdit = () => {
   const { user: currentUser } = useAuth()
   const isNew = id === 'new' || !id
   const [loading, setLoading] = useState(!isNew)
+  const documentsRef = useRef(null)
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
@@ -164,8 +166,16 @@ const SupremeCourtCaseEdit = () => {
     
     setErrors({})
     try {
+      let savedCaseId = id
+      
       if (isNew) {
-        await caseService.createSupremeCourtCase(formData)
+        const response = await caseService.createSupremeCourtCase(formData)
+        savedCaseId = response.data?.data?.supremeRequestId || response.data?.data?.id
+        
+        // Upload pending documents if any
+        if (documentsRef.current && savedCaseId) {
+          await documentsRef.current.uploadPendingFiles(savedCaseId)
+        }
       } else {
         await caseService.updateSupremeCourtCase(id, formData)
       }
@@ -390,6 +400,8 @@ const SupremeCourtCaseEdit = () => {
           </div>
 
           <div className="lg:col-span-4 flex flex-col gap-6">
+            <CaseDocuments ref={documentsRef} caseType="supreme" caseId={id} />
+
              <Card className="p-6 sticky top-6">
               <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
               {/* <div className="flex flex-col gap-2 mb-4">

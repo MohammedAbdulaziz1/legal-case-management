@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class CaseRegistration extends Model
 {
@@ -55,4 +56,12 @@ class CaseRegistration extends Model
                 'assigned_case_registration_request_id'
             );
         }
+
+    /**
+     * Get all documents for this case.
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
+    }
 }

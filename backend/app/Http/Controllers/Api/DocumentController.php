@@ -21,6 +21,16 @@ class DocumentController extends Controller
     {
         $query = Document::with('uploader');
 
+        // Filter by related case (polymorphic relationship)
+        if ($request->has('documentable_type') && $request->has('documentable_id')) {
+            $query->where('documentable_type', $request->documentable_type)
+                  ->where('documentable_id', $request->documentable_id);
+        } elseif ($request->has('general_only') && $request->general_only) {
+            // Only show general documents (not attached to any case)
+            $query->whereNull('documentable_type')
+                  ->whereNull('documentable_id');
+        }
+
         // Search by name or description
         if ($request->has('search')) {
             $search = $request->search;
@@ -88,7 +98,7 @@ class DocumentController extends Controller
         $filePath = $file->storeAs($directory, $filename, 'public');
 
         // Create document record
-        $document = Document::create([
+        $documentData = [
             'name' => $request->name,
             'original_filename' => $originalFilename,
             'file_path' => $filePath,
@@ -96,7 +106,15 @@ class DocumentController extends Controller
             'mime_type' => $mimeType,
             'description' => $request->description,
             'uploaded_by' => $request->user()->id,
-        ]);
+        ];
+
+        // Add polymorphic relationship if provided
+        if ($request->has('documentable_type') && $request->has('documentable_id')) {
+            $documentData['documentable_type'] = $request->documentable_type;
+            $documentData['documentable_id'] = $request->documentable_id;
+        }
+
+        $document = Document::create($documentData);
 
         return response()->json([
             'success' => true,

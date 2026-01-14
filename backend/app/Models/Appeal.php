@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Appeal extends Model
 {
@@ -58,5 +59,13 @@ class Appeal extends Model
     public function supremeCourtCases(): HasMany
     {
         return $this->hasMany(SupremeCourt::class, 'appeal_request_id');
+    }
+
+    /**
+     * Get all documents for this appeal case.
+     */
+    public function documents(): MorphMany
+    {
+        return $this->morphMany(Document::class, 'documentable');
     }
 }
