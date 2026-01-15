@@ -17,7 +17,6 @@ class StoreCaseRegistrationRequest extends FormRequest
             'title' => ['nullable', 'string', 'max:255'],
             'case_number' => ['required', 'integer'],
             'case_date' => ['required', 'date'],
-            'session_date' => ['required', 'date'],
             'plaintiff' => ['nullable', 'date'],
             'plaintiffLawyer' => ['nullable', 'date'],
             'defendant' => ['nullable', 'date'],
@@ -29,10 +28,10 @@ class StoreCaseRegistrationRequest extends FormRequest
             'first_instance_judgment' => ['required', 'string', 'max:255'],
             'judgementdate' => ['nullable', 'date'],
             'judgementrecivedate' => ['nullable', 'date'],
-            'next_session_date' => ['nullable', 'date'],
             'status' => ['nullable', 'string', 'in:active,pending,judgment,closed,postponed'],
             'notes' => ['nullable', 'string'],
             'priority' => ['nullable', 'string'],
+            'court_number' => ['nullable', 'integer'],
 
         ];
     }

@@ -16,7 +16,6 @@ class CaseRegistration extends Model
         'first_instance_judgment',
         'case_date',
         'case_number',
-        'session_date',
         'court_number',
         'title',
         'client',
@@ -29,7 +28,6 @@ class CaseRegistration extends Model
         'judge',
         'judgementdate',
         'judgementrecivedate',
-        'next_session_date',
         'status',
         'notes',
     ];
@@ -38,8 +36,6 @@ class CaseRegistration extends Model
     {
         return [
             'case_date' => 'date',
-            'session_date' => 'date',
-            'next_session_date' => 'date',
             'judgementrecivedate'  => 'date',
             'judgementdate'  => 'date',
         ];

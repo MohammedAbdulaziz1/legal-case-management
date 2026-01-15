@@ -9,6 +9,7 @@ import Pagination from '../../components/ui/Pagination'
 import { JUDGMENT_TYPES, JUDGMENT_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
+import { formatDateHijri } from '../../utils/hijriDate'
 
 const PrimaryCases = () => {
   const navigate = useNavigate()
@@ -22,7 +23,7 @@ const PrimaryCases = () => {
   const [search, setSearch] = useState('')
   const [filters, setFilters] = useState({})
   const [sortBy, setSortBy] = useState('created_at')
-  const [sortOrder, setSortOrder] = useState('desc')
+  const [sortOrder, setSortOrder] = useState('asc')
 
   useEffect(() => {
     fetchCases()
@@ -94,7 +95,6 @@ const PrimaryCases = () => {
           assigned_id: ci.assignedCaseRegistrationRequestId || ci.assigned_case_registration_request_id || '',
           case_number: ci.caseNumber || ci.case_number || '',
           case_date: formatDate(ci.registrationDate || ci.caseDate || ci.case_date),
-          session_date: formatDate(ci.sessionDate || ci.caseDate || ci.session_date),
           court_number: ci.courtNumber || ci.court_number || '',
           title: ci.title || ci.subject || '',
           client: ci.client || '',
@@ -185,7 +185,7 @@ const PrimaryCases = () => {
       const getVal = (it) => {
         if (!it) return ''
         if (key === 'case_number') return Number(it.caseNumber || it.case_number || 0)
-        if (key === 'case_date' || key === 'session_date' || key === 'created_at') return new Date(it.sessionDate || it.caseDate || it.created_at || it.createdAt || null).getTime() || 0
+        if (key === 'case_date' || key === 'created_at') return new Date(it.registrationDate || it.caseDate || it.created_at || it.createdAt || null).getTime() || 0
         if (key === 'title') return (it.title || it.subject || '').toString()
         return (it[key] || '').toString()
       }
@@ -238,23 +238,12 @@ const PrimaryCases = () => {
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden lg:block mx-1"></div>
-            <Button variant="secondary" size="sm" icon="filter_list" onClick={() => {
-              const status = window.prompt('أدخل حالة للتصفية (مثال: active, closed) أو اترك فارغاً لإلغاء:')
-              if (status === null) return
-              setFilters(prev => ({ ...prev, status: status || undefined }))
-              setCurrentPage(1)
-            }}>
-              تصفية
-            </Button>
             <Button variant="secondary" size="sm" icon="sort" onClick={() => {
               setSortBy(prev => prev || 'created_at')
               setSortOrder(prev => (prev === 'asc' ? 'desc' : 'asc'))
               setCurrentPage(1)
             }}>
               ترتيب ({sortOrder === 'asc' ? 'صاعد' : 'تنازلي'})
-            </Button>
-            <Button variant="secondary" size="sm" icon="download" onClick={handleExport}>
-              تصدير
             </Button>
           </div>
         </div>
@@ -302,9 +291,6 @@ const PrimaryCases = () => {
                     className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-[200px] text-center" scope="col">
                       موضوع الدعوى
                     </th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap" scope="col">
-                      تاريخ الجلسة
-                    </th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center" scope="col">
                       الحكم
                     </th>
@@ -326,9 +312,8 @@ const PrimaryCases = () => {
                         <td className="px-6 py-4 font-medium text-primary whitespace-nowrap hover:underline">
                           {caseItem.caseNumber || caseId}
                         </td>
-                        <td  colSpan={2} className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.registrationDate || 'غير محدد'}</td>
+                        <td  colSpan={2} className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{formatDateHijri(caseItem.registrationDate || caseItem.caseDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-center">{caseItem.title || caseItem.subject || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDate(caseItem.sessionDate || caseItem.caseDate)}</td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
                             {JUDGMENT_LABELS[judgment] || 'قيد المعالجة'}

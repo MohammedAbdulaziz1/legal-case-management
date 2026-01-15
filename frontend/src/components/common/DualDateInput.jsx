@@ -17,9 +17,10 @@ const DualDateInput = ({
   error,
   required = false,
   disabled = false,
-  className = ''
+  className = '',
+  hijriOnly = false // New prop to show only Hijri calendar
 }) => {
-  const initialMode = 'gregorian'
+  const initialMode = hijriOnly ? 'hijri' : 'gregorian'
   const [mode, setMode] = useState(initialMode) // 'gregorian' | 'hijri'
 
   const pickerConfig = useMemo(() => {
@@ -45,16 +46,48 @@ const DualDateInput = ({
   }, [value, mode])
 
   const handlePickerChange = (dateObj) => {
-    if (!dateObj) {
+    // Handle array case (react-multi-date-picker can return arrays)
+    const date = Array.isArray(dateObj) ? dateObj[0] : dateObj
+    
+    if (!date) {
       onChange?.('')
       return
     }
 
-    try {
-      const iso = dateObj.convert(gregorian, gregorian_ar).format('YYYY-MM-DD')
-      onChange?.(iso)
-    } catch {
-      // ignore
+      try {
+      // The date should be a DateObject from react-multi-date-picker
+      // Convert to Gregorian calendar to get ISO format
+      const gregorianDate = date.convert(gregorian, gregorian_ar)
+      
+      if (!gregorianDate) {
+        return
+      }
+
+      // Get date components - month is accessed as month.number (as per utility file)
+      const year = gregorianDate.year
+      const monthNum = gregorianDate.month?.number ?? gregorianDate.month
+      const day = gregorianDate.day
+
+      if (!year || !monthNum || !day) {
+        return
+      }
+
+      // Format as ISO date (YYYY-MM-DD) with proper padding
+      const iso = `${year}-${String(monthNum).padStart(2, '0')}-${String(day).padStart(2, '0')}`
+      
+      // Validate the ISO format
+      if (isIsoDate(iso)) {
+        // Additional validation: ensure the date is actually valid
+        const testDate = new Date(year, monthNum - 1, day)
+        if (testDate.getFullYear() === year && 
+            testDate.getMonth() === monthNum - 1 && 
+            testDate.getDate() === day) {
+          // Date is valid, update the value
+          onChange?.(iso)
+        }
+      }
+    } catch (error) {
+      // Silently handle conversion errors
     }
   }
 
@@ -69,79 +102,57 @@ const DualDateInput = ({
         ) : (
           <div />
         )}
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => setMode('gregorian')}
-            className={`text-xs font-semibold px-2.5 py-1 rounded-md border transition-colors ${
-              mode === 'gregorian'
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200'
-            } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-          >
-            ميلادي
-          </button>
-          <button
-            type="button"
-            disabled={disabled}
-            onClick={() => setMode('hijri')}
-            className={`text-xs font-semibold px-2.5 py-1 rounded-md border transition-colors ${
-              mode === 'hijri'
-                ? 'bg-primary text-white border-primary'
-                : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200'
-            } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
-          >
-            هجري
-          </button>
-        </div>
+        {!hijriOnly && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => setMode('gregorian')}
+              className={`text-xs font-semibold px-2.5 py-1 rounded-md border transition-colors ${
+                mode === 'gregorian'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200'
+              } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+            >
+              ميلادي
+            </button>
+            <button
+              type="button"
+              disabled={disabled}
+              onClick={() => setMode('hijri')}
+              className={`text-xs font-semibold px-2.5 py-1 rounded-md border transition-colors ${
+                mode === 'hijri'
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-white dark:bg-slate-700 border-slate-200 dark:border-slate-600 text-slate-600 dark:text-slate-200'
+              } ${disabled ? 'opacity-60 cursor-not-allowed' : ''}`}
+            >
+              هجري
+            </button>
+          </div>
+        )}
       </div>
 
-      {mode === 'gregorian' ? (
-        <DatePicker
-          value={pickerValue}
-          onChange={handlePickerChange}
-          calendar={pickerConfig.calendar}
-          locale={pickerConfig.locale}
-          disabled={disabled}
-          format="YYYY-MM-DD"
-          render={(val, openCalendar) => (
-            <Input
-              label={null}
-              value={val}
-              onChange={() => {}}
-              onClick={openCalendar}
-              readOnly
-              disabled={disabled}
-              required={required}
-              error={error}
-              placeholder="YYYY-MM-DD"
-            />
-          )}
-        />
-      ) : (
-        <DatePicker
-          value={pickerValue}
-          onChange={handlePickerChange}
-          calendar={pickerConfig.calendar}
-          locale={pickerConfig.locale}
-          disabled={disabled}
-          format="YYYY-MM-DD"
-          render={(val, openCalendar) => (
-            <Input
-              label={null}
-              value={val}
-              onChange={() => {}}
-              onClick={openCalendar}
-              readOnly
-              disabled={disabled}
-              required={required}
-              error={error}
-              placeholder="YYYY-MM-DD"
-            />
-          )}
-        />
-      )}
+      <DatePicker
+        value={pickerValue}
+        onChange={handlePickerChange}
+        calendar={pickerConfig.calendar}
+        locale={pickerConfig.locale}
+        disabled={disabled}
+        format="YYYY-MM-DD"
+        render={(val, openCalendar) => (
+          <Input
+            label={null}
+            value={val || ''}
+            onChange={() => {}}
+            onClick={openCalendar}
+            readOnly
+            disabled={disabled}
+            required={required}
+            error={error}
+            placeholder="YYYY-MM-DD"
+          />
+        )}
+      />
     </div>
   )
 }

@@ -17,7 +17,6 @@ class SupremeCourt extends Model
         'supreme_case_number',
         'appeal_request_id',
         'appealed_by',
-        'sessionDate',
         'supremeCourtJudgment',
         'judgementdate',
         'judgementrecivedate',
@@ -37,7 +36,6 @@ class SupremeCourt extends Model
     {
         return [
             'supreme_date' => 'date',
-            'sessionDate' => 'date',
             'judgementdate' => 'date',
             'judgementrecivedate' => 'date',
         ];

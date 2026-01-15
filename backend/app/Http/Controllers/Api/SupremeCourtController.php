@@ -38,8 +38,16 @@ class SupremeCourtController extends Controller
             $query->where('status', $request->status);
         }
 
+        // Sorting
+        $allowedSorts = ['supreme_case_number', 'supreme_date', 'created_at', 'appealed_by'];
+        $sortBy = $request->get('sort_by', 'created_at');
+        if (!in_array($sortBy, $allowedSorts)) {
+            $sortBy = 'created_at';
+        }
+        $order = strtolower($request->get('order', 'asc')) === 'asc' ? 'asc' : 'desc';
+
         $perPage = $request->get('per_page', 10);
-        $cases = $query->orderBy('created_at', 'desc')->paginate($perPage);
+        $cases = $query->orderBy($sortBy, $order)->paginate($perPage);
 
         return response()->json([
             'success' => true,
