@@ -22,7 +22,6 @@ const SupremeCourtCaseEdit = () => {
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
-    sessionDate: '',
     supremeCourtJudgment: '',
     judgementdate: '',
     judgementrecivedate: '',
@@ -101,7 +100,6 @@ const SupremeCourtCaseEdit = () => {
         setFormData({
           caseNumber: caseData.caseNumber?.toString() || caseData.supremeCaseNumber?.toString() || '',
           registrationDate: caseData.date || caseData.supremeDate || '',
-          sessionDate: normalizeDateInputValue(caseData.sessionDate),
           supremeCourtJudgment: caseData.supremeCourtJudgment || '',
           judgementdate: normalizeDateInputValue(caseData.judgementdate),
           judgementrecivedate: normalizeDateInputValue(caseData.judgementrecivedate),
@@ -153,7 +151,6 @@ const SupremeCourtCaseEdit = () => {
     const validationErrors = {}
     if (!formData.caseNumber) validationErrors.caseNumber = 'رقم القضية مطلوب'
     if (!formData.registrationDate) validationErrors.registrationDate = 'تاريخ التسجيل مطلوب'
-    if (!formData.sessionDate) validationErrors.sessionDate = 'تاريخ الجلسة مطلوب'
     if (!formData.judgementdate) validationErrors.judgementdate = 'تاريخ الحكم مطلوب'
     if (!formData.judgementrecivedate) validationErrors.judgementrecivedate = 'تاريخ استلام الحكم مطلوب'
     if (!formData.appealedBy) validationErrors.appealedBy = 'من قام بالرفع مطلوب'
@@ -278,7 +275,7 @@ const SupremeCourtCaseEdit = () => {
                   }}
                   error={errors.registrationDate}
                   required
-                  hijriOnly={isNew}
+                  hijriOnly={true}
                 />
                 <Select
                   label="من قام بالرفع للمحكمة العليا"
@@ -304,7 +301,7 @@ const SupremeCourtCaseEdit = () => {
                   }}
                   error={errors.sessionDate}
                   required
-                  hijriOnly={isNew}
+                  hijriOnly={true}
                 />
                  <Input
                   label=" حكم  العليا"
@@ -321,7 +318,7 @@ const SupremeCourtCaseEdit = () => {
                   }}
                   error={errors.judgementdate}
                   required
-                  hijriOnly={isNew}
+                  hijriOnly={true}
                 />
                 
                  <DualDateInput
@@ -333,7 +330,7 @@ const SupremeCourtCaseEdit = () => {
                   }}
                   error={errors.judgementrecivedate}
                   required
-                  hijriOnly={isNew}
+                  hijriOnly={true}
                 />
                 <Input  
                   label="المحكمة العليا"
@@ -401,57 +398,69 @@ const SupremeCourtCaseEdit = () => {
 
           <div className="lg:col-span-4 flex flex-col gap-6">
             <CaseDocuments ref={documentsRef} caseType="supreme" caseId={id} />
-
-             <Card className="p-6 sticky top-6">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
-              {/* <div className="flex flex-col gap-2 mb-4">
-                <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
-                <Select
-                  value={formData.status}
-                  onChange={(e) => handleChange('status', e.target.value)}
-                  options={Object.entries(CASE_STATUSES).map(([key, value]) => ({
-                    value,
-                    label: CASE_STATUS_LABELS[value]
-                  }))}
-                />
-              </div> */}
-              <div className="flex flex-col gap-2 mb-4">
-                <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors flex-1">
-                    <input
-                      type="radio"
-                      name="priority"
-                      value="normal"
-                      checked={formData.priority === 'normal'}
-                      onChange={(e) => handleChange('priority', e.target.value)}
-                      className="text-primary focus:ring-primary"
+             {!isNew ? (
+                <Card className="p-6 sticky top-6">
+                  <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
+                  {/* <div className="flex flex-col gap-2 mb-4">
+                    <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
+                    <Select
+                      value={formData.status}
+                      onChange={(e) => handleChange('status', e.target.value)}
+                      options={Object.entries(CASE_STATUSES).map(([key, value]) => ({
+                        value,
+                        label: CASE_STATUS_LABELS[value]
+                      }))}
                     />
-                    <span className="text-sm">عادية</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900 flex-1">
-                    <input
-                      type="radio"
-                      name="priority"
-                      value="urgent"
-                      checked={formData.priority === 'urgent'}
-                      onChange={(e) => handleChange('priority', e.target.value)}
-                      className="text-red-500 focus:ring-red-500"
-                    />
-                    <span className="text-sm font-bold text-red-600 dark:text-red-400">مستعجلة</span>
-                  </label>
-                </div>
-              </div>
-              <div className="border-t border-slate-200 dark:border-slate-700 my-4"></div>
-              <div className="flex flex-col gap-3">
-                <Button variant="primary" size="lg" icon="save" onClick={handleSubmit} className="w-full">
-                  {isNew ? 'إضافة القضية' : 'حفظ التعديلات'}
-                </Button>
-                <Button variant="secondary" size="lg" onClick={() => navigate('/cases/supreme')} className="w-full">
-                  إلغاء
-                </Button>
-              </div>
-            </Card>
+                  </div> */}
+                  <div className="flex flex-col gap-2 mb-4">
+                    <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
+                    <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors flex-1">
+                        <input
+                          type="radio"
+                          name="priority"
+                          value="normal"
+                          checked={formData.priority === 'normal'}
+                          onChange={(e) => handleChange('priority', e.target.value)}
+                          className="text-primary focus:ring-primary"
+                        />
+                        <span className="text-sm">عادية</span>
+                      </label>
+                      <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900 flex-1">
+                        <input
+                          type="radio"
+                          name="priority"
+                          value="urgent"
+                          checked={formData.priority === 'urgent'}
+                          onChange={(e) => handleChange('priority', e.target.value)}
+                          className="text-red-500 focus:ring-red-500"
+                        />
+                        <span className="text-sm font-bold text-red-600 dark:text-red-400">مستعجلة</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="border-t border-slate-200 dark:border-slate-700 my-4"></div>
+                  <div className="flex flex-col gap-3">
+                    <Button variant="primary" size="lg" icon="save" onClick={handleSubmit} className="w-full">
+                      حفظ التعديلات
+                    </Button>
+                    <Button variant="secondary" size="lg" onClick={() => navigate('/cases/supreme')} className="w-full">
+                      إلغاء
+                    </Button>
+                  </div>
+                </Card>
+              ) : (
+                <Card className="p-6 sticky top-6">
+                  <div className="flex flex-col gap-3">
+                    <Button variant="primary" size="lg" icon="save" onClick={handleSubmit} className="w-full">
+                      إضافة القضية
+                    </Button>
+                    <Button variant="secondary" size="lg" onClick={() => navigate('/cases/supreme')} className="w-full">
+                      إلغاء
+                    </Button>
+                  </div>
+                </Card>
+              )}
           </div>
         </div>
       </form>

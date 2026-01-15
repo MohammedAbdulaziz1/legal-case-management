@@ -20,7 +20,6 @@ class Appeal extends Model
         'appeal_court_number',
         'appeal_judgment',
         'appealed_by',
-        'sessionDate',
         'judgementdate',
         'judgementrecivedate',
         'assigned_case_registration_request_id',

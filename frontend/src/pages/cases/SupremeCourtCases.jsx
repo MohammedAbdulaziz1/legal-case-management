@@ -5,7 +5,7 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Pagination from '../../components/ui/Pagination'
-import { USER_ROLES } from '../../utils/constants'
+import { USER_ROLES, JUDGMENT_TYPES, JUDGMENT_LABELS } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
 import { formatDateHijri } from '../../utils/hijriDate'
@@ -61,6 +61,22 @@ const SupremeCourtCases = () => {
     } catch {
       return dateString
     }
+  }
+
+  const getJudgmentType = (judgment) => {
+    if (!judgment) return JUDGMENT_TYPES.PENDING
+     
+    const judgmentLower = judgment.toLowerCase()
+    if (judgmentLower.includes('الغاء') || judgmentLower.includes('الغاء الحكم') || judgmentLower.includes('الغاء القرار')) {
+      return JUDGMENT_TYPES.CANCELED
+    }
+    if (judgmentLower.includes('رفض الدعوة')) {
+      return JUDGMENT_TYPES.REJECTED
+    }
+    if (judgmentLower.includes('تاجيل') || judgmentLower.includes('تأجيل')) {
+      return JUDGMENT_TYPES.POSTPONED
+    }
+    return JUDGMENT_TYPES.PENDING
   }
 
   const breadcrumbs = [
@@ -133,7 +149,6 @@ const SupremeCourtCases = () => {
                   <tr>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم العليا</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ العليا</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">حكم العليا</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من  قام بالرفع</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الحالة</th>
@@ -143,6 +158,7 @@ const SupremeCourtCases = () => {
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                   {cases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.supremeRequestId
+                    const judgment = getJudgmentType(caseItem.supremeCourtJudgment)
                     return (
                       <tr 
                         key={caseId} 
@@ -153,8 +169,11 @@ const SupremeCourtCases = () => {
                           {caseItem.caseNumber || caseItem.supremeCaseNumber || caseId}
                         </td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.date || caseItem.supremeDate || caseItem.registrationDate) || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.sessionDate) || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.supremeCourtJudgment || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-center">
+                          <StatusBadge judgment={judgment}>
+                            {JUDGMENT_LABELS[judgment] || caseItem.supremeCourtJudgment || 'غير محدد'}
+                          </StatusBadge>
+                        </td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge status={caseItem.status || 'active'}>

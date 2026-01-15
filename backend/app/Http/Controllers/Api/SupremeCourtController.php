@@ -43,7 +43,7 @@ class SupremeCourtController extends Controller
         }
 
         // Sorting
-        $allowedSorts = ['supreme_case_number', 'supreme_date', 'sessionDate', 'created_at', 'appealed_by'];
+        $allowedSorts = ['supreme_case_number', 'supreme_date', 'created_at', 'appealed_by'];
         $sortBy = $request->get('sort_by', 'created_at');
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'created_at';

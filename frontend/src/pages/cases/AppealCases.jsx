@@ -5,7 +5,7 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Pagination from '../../components/ui/Pagination'
-import { USER_ROLES } from '../../utils/constants'
+import { USER_ROLES, JUDGMENT_TYPES, JUDGMENT_LABELS, JUDGMENT_LABELS_APPEAL } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
 import { formatDateHijri } from '../../utils/hijriDate'
@@ -38,7 +38,7 @@ const AppealCases = () => {
       })
       if (response.data.success) {
         setCases(response.data.data || [])
-          console.log(cases);
+          
         setTotalItems(response.data.meta?.total || 0)
       }
     } catch (err) {
@@ -62,6 +62,25 @@ const AppealCases = () => {
     } catch {
       return dateString
     }
+  }
+
+  const getJudgmentType = (judgment) => {
+    if (!judgment) return JUDGMENT_TYPES.PENDING
+     
+    const judgmentLower = judgment.toLowerCase()
+    if (judgmentLower.includes('الغاء') || judgmentLower.includes('الغاء الحكم') || judgmentLower.includes('الغاء القرار')) {
+      return JUDGMENT_TYPES.CANCELED
+    }
+    if (judgmentLower.includes('رفض الدعوة')) {
+      return JUDGMENT_TYPES.REJECTED
+    }
+    if (judgmentLower.includes('بتأييد الحكم')) {
+      return JUDGMENT_TYPES.ACCEPTED
+    }
+    if (judgmentLower.includes('تاجيل') || judgmentLower.includes('تأجيل')) {
+      return JUDGMENT_TYPES.POSTPONED
+    }
+    return JUDGMENT_TYPES.PENDING
   }
 
   const breadcrumbs = [
@@ -151,7 +170,6 @@ const AppealCases = () => {
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الاستئناف</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من المستأنف</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap"> حكم الاستئناف</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
                   </tr>
                 </thead>
@@ -159,9 +177,12 @@ const AppealCases = () => {
                   {cases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.appealRequestId
                     const appealJudgment = (caseItem.appealJudgment || '').toString().trim()
+                    
+                    const judgment = getJudgmentType(appealJudgment)
                     const canTransferToSupremeCourt =
                       appealJudgment === 'بتأييد الحكم' ||
                       appealJudgment === 'الغاء الحكم'
+                      
                     return (
                       <tr 
                         key={caseId} 
@@ -173,8 +194,11 @@ const AppealCases = () => {
                         </td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{formatDateHijri(caseItem.registrationDate || caseItem.appealDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400">{caseItem.appealJudgment || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.sessionDate) || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-center">
+                          <StatusBadge judgment={judgment}>
+                            {JUDGMENT_LABELS_APPEAL[judgment] || appealJudgment || 'غير محدد'}
+                          </StatusBadge>
+                        </td>
                         <td className="px-6 py-4">
                           {currentUser?.role !== USER_ROLES.VIEWER ? (
                             <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>

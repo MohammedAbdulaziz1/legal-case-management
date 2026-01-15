@@ -17,13 +17,11 @@ class UpdateCaseRegistrationRequest extends FormRequest
             'first_instance_judgment' => ['sometimes', 'string', 'max:255'],
             'case_date' => ['sometimes', 'date'],
             'case_number' => ['sometimes', 'integer'],
-            'session_date' => ['sometimes', 'date'],
             'court_number' => ['sometimes', 'integer'],
             'title' => ['nullable', 'string', 'max:255'],
             'client' => ['nullable', 'string', 'max:255'],
             'opponent' => ['nullable', 'string', 'max:255'],
             'judge' => ['nullable', 'string', 'max:255'],
-            'next_session_date' => ['nullable', 'date'],
             'status' => ['nullable', 'string', 'in:active,pending,judgment,closed,postponed'],
             'notes' => ['nullable', 'string'],
         ];

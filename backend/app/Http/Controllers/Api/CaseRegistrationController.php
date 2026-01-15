@@ -44,7 +44,7 @@ class CaseRegistrationController extends Controller
         }
 
         // Sorting
-        $allowedSorts = ['case_number', 'case_date', 'session_date', 'created_at', 'title'];
+        $allowedSorts = ['case_number', 'case_date', 'created_at', 'title'];
         $sortBy = $request->get('sort_by', 'created_at');
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'created_at';
@@ -87,7 +87,7 @@ class CaseRegistrationController extends Controller
             $query->where('status', $request->status);
         }
 
-        $allowedSorts = ['case_number', 'case_date', 'session_date', 'created_at', 'title'];
+        $allowedSorts = ['case_number', 'case_date', 'created_at', 'title'];
         $sortBy = $request->get('sort_by', 'created_at');
         if (!in_array($sortBy, $allowedSorts)) {
             $sortBy = 'created_at';
@@ -96,7 +96,7 @@ class CaseRegistrationController extends Controller
 
         $cases = $query->orderBy($sortBy, $order)->get();
 
-        $columns = ['case_number', 'case_date', 'title', 'client', 'opponent', 'session_date', 'first_instance_judgment', 'status'];
+        $columns = ['case_number', 'case_date', 'title', 'client', 'opponent', 'first_instance_judgment', 'status'];
 
         $callback = function () use ($cases, $columns) {
             $handle = fopen('php://output', 'w');
@@ -110,7 +110,6 @@ class CaseRegistrationController extends Controller
                     $c->title,
                     $c->client,
                     $c->opponent,
-                    $c->session_date,
                     $c->first_instance_judgment ?? $c->judgment ?? '',
                     $c->status,
                 ]);

@@ -95,7 +95,6 @@ const PrimaryCases = () => {
           assigned_id: ci.assignedCaseRegistrationRequestId || ci.assigned_case_registration_request_id || '',
           case_number: ci.caseNumber || ci.case_number || '',
           case_date: formatDate(ci.registrationDate || ci.caseDate || ci.case_date),
-          session_date: formatDate(ci.sessionDate || ci.caseDate || ci.session_date),
           court_number: ci.courtNumber || ci.court_number || '',
           title: ci.title || ci.subject || '',
           client: ci.client || '',
@@ -186,7 +185,7 @@ const PrimaryCases = () => {
       const getVal = (it) => {
         if (!it) return ''
         if (key === 'case_number') return Number(it.caseNumber || it.case_number || 0)
-        if (key === 'case_date' || key === 'session_date' || key === 'created_at') return new Date(it.sessionDate || it.caseDate || it.created_at || it.createdAt || null).getTime() || 0
+        if (key === 'case_date' || key === 'created_at') return new Date(it.registrationDate || it.caseDate || it.created_at || it.createdAt || null).getTime() || 0
         if (key === 'title') return (it.title || it.subject || '').toString()
         return (it[key] || '').toString()
       }
@@ -292,9 +291,6 @@ const PrimaryCases = () => {
                     className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-[200px] text-center" scope="col">
                       موضوع الدعوى
                     </th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap" scope="col">
-                      تاريخ الجلسة
-                    </th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center" scope="col">
                       الحكم
                     </th>
@@ -318,7 +314,6 @@ const PrimaryCases = () => {
                         </td>
                         <td  colSpan={2} className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{formatDateHijri(caseItem.registrationDate || caseItem.caseDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-center">{caseItem.title || caseItem.subject || 'غير محدد'}</td>
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.sessionDate || caseItem.caseDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
                             {JUDGMENT_LABELS[judgment] || 'قيد المعالجة'}

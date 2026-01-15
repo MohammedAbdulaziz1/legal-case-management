@@ -20,13 +20,11 @@ export const caseService = {
       first_instance_judgment: data.firstInstanceJudgment || data.judgment || 'قيد النظر',
       case_date: data.registrationDate || data.caseDate,
       case_number: parseInt(data.caseNumber) || 0,
-      session_date: data.sessionDate || data.registrationDate || data.caseDate,
       court_number: parseInt(data.courtNumber) || 1,
       title: data.title || '',
       client: data.client || '',
       opponent: data.opponent || '',
       judge: data.judge || '',
-      next_session_date: data.nextSessionDate || null,
       status: data.status || 'active',
       notes: data.notes || '',
     }
@@ -38,13 +36,11 @@ export const caseService = {
       first_instance_judgment: data.firstInstanceJudgment || data.judgment,
       case_date: data.registrationDate || data.caseDate,
       case_number: data.caseNumber ? parseInt(data.caseNumber) : undefined,
-      session_date: data.sessionDate || data.registrationDate,
       court_number: data.courtNumber,
       title: data.title,
       client: data.client,
       opponent: data.opponent,
       judge: data.judge,
-      next_session_date: data.nextSessionDate,
       status: data.status,
       notes: data.notes,
     }
@@ -75,7 +71,6 @@ export const caseService = {
       appeal_court_number: parseInt(data.courtNumber) || 1,
       appeal_judgment: data.appealJudgment || data.judgment || 'قيد النظر',
       appealed_by: data.appealedBy || '',
-      sessionDate: data.sessionDate || '',
       judgementdate: data.judgementdate,
       judgementrecivedate: data.judgementrecivedate,
       assigned_case_registration_request_id: parseInt(data.caseRegistrationId) || parseInt(data.assignedCaseRegistrationRequestId) || null,
@@ -89,7 +84,6 @@ export const caseService = {
       subject: data.subject || '',
       judge: data.judge || '',
     }
-    console.log(backendData);
     return api.post('/cases/appeal', backendData)
   },
 
@@ -100,7 +94,6 @@ export const caseService = {
       appeal_court_number: data.courtNumber ? parseInt(data.courtNumber) : undefined,
       appeal_judgment: data.appealJudgment || data.judgment,
       appealed_by: data.appealedBy,
-      sessionDate: data.sessionDate || '',
       judgementdate: data.judgementdate || '',
       judgementrecivedate: data.judgementrecivedate || '',
       status: data.status,
@@ -113,7 +106,7 @@ export const caseService = {
       subject: data.subject,
       judge: data.judge,
     }
-        console.log(backendData);
+        
 
     // Remove undefined values
     Object.keys(backendData).forEach(key => {
@@ -141,7 +134,6 @@ export const caseService = {
       supreme_case_number: parseInt(data.caseNumber) || 0,
       appeal_request_id: parseInt(data.appealId) || parseInt(data.appealRequestId) || null,
       appealed_by: data.appealedBy || '',
-      sessionDate: data.sessionDate || null,
       supremeCourtJudgment: data.supremeCourtJudgment || null,
       judgementdate: data.judgementdate || null,
       judgementrecivedate: data.judgementrecivedate || null,
@@ -165,7 +157,6 @@ export const caseService = {
       supreme_case_number: data.caseNumber ? parseInt(data.caseNumber) : undefined,
       appeal_request_id: data.appealId ? parseInt(data.appealId) : (data.appealRequestId ? parseInt(data.appealRequestId) : undefined),
       appealed_by: data.appealedBy ?? undefined,
-      sessionDate: data.sessionDate ?? undefined,
       supremeCourtJudgment: data.supremeCourtJudgment ?? undefined,
       judgementdate: data.judgementdate ?? undefined,
       judgementrecivedate: data.judgementrecivedate ?? undefined,

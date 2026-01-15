@@ -23,7 +23,6 @@ const PrimaryCaseEdit = () => {
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
-    sessionDate: '',
     title: '',
     // client: '',
     // opponent: '',
@@ -38,7 +37,6 @@ const PrimaryCaseEdit = () => {
     firstInstanceJudgment: 'قيد المعالجة',
     judgementdate:'',
     judgementrecivedate:'',
-    nextSessionDate: '',
     // status: CASE_STATUSES.ACTIVE,
     notes: '',
     priority:'',
@@ -70,7 +68,6 @@ const PrimaryCaseEdit = () => {
         setFormData({
           caseNumber: caseData.caseNumber?.toString() || '',
           registrationDate: caseData.registrationDate || caseData.caseDate || '',
-          sessionDate: caseData.sessionDate || caseData.registrationDate || '',
           title: caseData.title || '',
           client: caseData.client || '',
           opponent: caseData.opponent || '',
@@ -78,7 +75,6 @@ const PrimaryCaseEdit = () => {
           courtNumber: caseData.courtNumber || 1,
           judge: caseData.judge || '',
           firstInstanceJudgment: caseData.firstInstanceJudgment || 'قيد المعالجة',
-          nextSessionDate: caseData.nextSessionDate || '',
           status: caseData.status || CASE_STATUSES.ACTIVE,
           notes: caseData.notes || ''
         })
@@ -145,10 +141,9 @@ const PrimaryCaseEdit = () => {
           // Map backend field names to frontend field names
           const frontendKey = key === 'case_number' ? 'caseNumber' :
                              key === 'case_date' ? 'registrationDate' :
-                             key === 'session_date' ? 'sessionDate' :
                              key === 'court_number' ? 'courtNumber' :
                              key === 'first_instance_judgment' ? 'firstInstanceJudgment' :
-                             key === 'next_session_date' ? 'nextSessionDate' : key
+                             key
           formattedErrors[frontendKey] = Array.isArray(apiErrors[key]) ? apiErrors[key][0] : apiErrors[key]
         })
         setErrors(formattedErrors)
@@ -238,17 +233,6 @@ const PrimaryCaseEdit = () => {
                   label="تاريخ الدعوى"
                   value={formData.registrationDate}
                   onChange={(val) => handleChange('registrationDate', val)}
-                  required
-                  hijriOnly={isNew}
-                />
-                <DualDateInput
-                  label="تاريخ الجلسة"
-                  value={formData.sessionDate}
-                  onChange={(val) => {
-                    handleChange('sessionDate', val)
-                    if (errors.sessionDate) setErrors(prev => ({ ...prev, sessionDate: '' }))
-                  }}
-                  error={errors.sessionDate}
                   required
                   hijriOnly={isNew}
                 />
@@ -412,52 +396,49 @@ const PrimaryCaseEdit = () => {
 
             <CaseDocuments ref={documentsRef} caseType="primary" caseId={id} />
 
-             <Card className="p-6 sticky top-6">
-              <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
-              {/* <div className="flex flex-col gap-2 mb-4">
-                <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
-                <Select
-                  value={formData.status}
-                  onChange={(e) => handleChange('status', e.target.value)}
-                  options={Object.entries(CASE_STATUSES).map(([key, value]) => ({
-                    value,
-                    label: CASE_STATUS_LABELS[value]
-                  }))}
-                />
-              </div> */}
-              <div className="flex flex-col gap-2 mb-4">
-                <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
-                <div className="flex items-center gap-3">
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors flex-1">
-                    <input
-                      type="radio"
-                      name="priority"
-                      value="normal"
-                      checked={formData.priority === 'normal'}
-                      onChange={(e) => handleChange('priority', e.target.value)}
-                      className="text-primary focus:ring-primary"
-                    />
-                    <span className="text-sm">عادية</span>
-                  </label>
-                  <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900 flex-1">
-                    <input
-                      type="radio"
-                      name="priority"
-                      value="urgent"
-                      checked={formData.priority === 'urgent'}
-                      onChange={(e) => handleChange('priority', e.target.value)}
-                      className="text-red-500 focus:ring-red-500"
-                    />
-                    <span className="text-sm font-bold text-red-600 dark:text-red-400">مستعجلة</span>
-                  </label>
+             {!isNew && (
+              <Card className="p-6 sticky top-6">
+                <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
+                {/* <div className="flex flex-col gap-2 mb-4">
+                  <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
+                  <Select
+                    value={formData.status}
+                    onChange={(e) => handleChange('status', e.target.value)}
+                    options={Object.entries(CASE_STATUSES).map(([key, value]) => ({
+                      value,
+                      label: CASE_STATUS_LABELS[value]
+                    }))}
+                  />
+                </div> */}
+                <div className="flex flex-col gap-2 mb-4">
+                  <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
+                  <div className="flex items-center gap-3">
+                    <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-slate-800/50 transition-colors flex-1">
+                      <input
+                        type="radio"
+                        name="priority"
+                        value="normal"
+                        checked={formData.priority === 'normal'}
+                        onChange={(e) => handleChange('priority', e.target.value)}
+                        className="text-primary focus:ring-primary"
+                      />
+                      <span className="text-sm">عادية</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer p-2 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900 flex-1">
+                      <input
+                        type="radio"
+                        name="priority"
+                        value="urgent"
+                        checked={formData.priority === 'urgent'}
+                        onChange={(e) => handleChange('priority', e.target.value)}
+                        className="text-red-500 focus:ring-red-500"
+                      />
+                      <span className="text-sm font-bold text-red-600 dark:text-red-400">مستعجلة</span>
+                    </label>
+                  </div>
                 </div>
-              </div>
-              <div className="border-t border-slate-200 dark:border-slate-700 my-4"></div>
-              <div className="flex flex-col gap-3">
-               
-               
-              </div>
-            </Card>
+              </Card>
+            )}
           </div>
         </div>
       </form>
