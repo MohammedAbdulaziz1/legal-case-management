@@ -11,7 +11,7 @@ import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
 import { formatDateHijri } from '../../utils/hijriDate'
 
-const PrimaryCases = () => {
+export default function PrimaryCases() {
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
   const [cases, setCases] = useState([])
@@ -415,6 +415,4 @@ const PrimaryCases = () => {
     </Layout>
   )
 }
-
-export default PrimaryCases
 
