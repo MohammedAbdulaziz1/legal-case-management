@@ -79,6 +79,18 @@ const SupremeCourtCases = () => {
     return JUDGMENT_TYPES.PENDING
   }
 
+  const getOutcomeFromJudgmentType = (judgmentType) => {
+    if (judgmentType === JUDGMENT_TYPES.CANCELED) return 1
+    if (judgmentType === JUDGMENT_TYPES.REJECTED) return 2
+    return 0
+  }
+
+  const OUTCOME_LABELS = {
+    1: 'كسب',
+    2: 'خسارة',
+    0: 'غير محدد',
+  }
+
   const breadcrumbs = [
     { label: 'الرئيسية', path: '/dashboard' },
     { label: 'قضايا المحكمة العليا' }
@@ -150,6 +162,7 @@ const SupremeCourtCases = () => {
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم العليا</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ العليا</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">حكم العليا</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">نتيجة القضية</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من  قام بالرفع</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الحالة</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
@@ -159,6 +172,7 @@ const SupremeCourtCases = () => {
                   {cases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.supremeRequestId
                     const judgment = getJudgmentType(caseItem.supremeCourtJudgment)
+                    const outcome = getOutcomeFromJudgmentType(judgment)
                     return (
                       <tr 
                         key={caseId} 
@@ -172,6 +186,11 @@ const SupremeCourtCases = () => {
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
                             {JUDGMENT_LABELS[judgment] || caseItem.supremeCourtJudgment || 'غير محدد'}
+                          </StatusBadge>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <StatusBadge judgment={outcome}>
+                            {OUTCOME_LABELS[outcome]}
                           </StatusBadge>
                         </td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>

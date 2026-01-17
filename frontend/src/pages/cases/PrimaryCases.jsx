@@ -155,6 +155,22 @@ const PrimaryCases = () => {
     return JUDGMENT_TYPES.PENDING
   }
 
+  const getOutcomeFromJudgmentType = (judgmentType) => {
+    if (judgmentType === JUDGMENT_TYPES.CANCELED) return 1
+    if (judgmentType === JUDGMENT_TYPES.REJECTED) return 2
+    return 0
+  }
+
+  const OUTCOME_LABELS = {
+    1: 'كسب',
+    2: 'خسارة',
+    0: 'غير محدد',
+  }
+
+  const canAppeal = (judgment) => {
+    return judgment !== JUDGMENT_TYPES.PENDING && judgment !== JUDGMENT_TYPES.POSTPONED
+  }
+
   const breadcrumbs = [
     { label: 'الرئيسية', path: '/dashboard' },
     { label: 'القضايا الابتدائية' }
@@ -164,10 +180,6 @@ const PrimaryCases = () => {
     { label: 'القضايا' },
     { label: 'القضايا الابتدائية' }
   ]
-
-  const canAppeal = (judgment) => {
-    return judgment === JUDGMENT_TYPES.CANCELED || judgment === JUDGMENT_TYPES.REJECTED
-  }
 
   // Client-side filtered and sorted view of currently loaded rows
   const displayedCases = (() => {
@@ -295,6 +307,9 @@ const PrimaryCases = () => {
                       الحكم
                     </th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center" scope="col">
+                      نتيجة القضية
+                    </th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center" scope="col">
                       الإجراءات
                     </th>
                   </tr>
@@ -303,6 +318,7 @@ const PrimaryCases = () => {
                   {displayedCases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.assignedCaseRegistrationRequestId
                     const judgment = getJudgmentType(caseItem.firstInstanceJudgment || caseItem.judgment)
+                    const outcome = getOutcomeFromJudgmentType(judgment)
                     return (
                       <tr 
                         key={caseId} 
@@ -319,6 +335,11 @@ const PrimaryCases = () => {
                             {JUDGMENT_LABELS[judgment] || 'قيد المعالجة'}
                             
                            
+                          </StatusBadge>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <StatusBadge judgment={outcome}>
+                            {OUTCOME_LABELS[outcome]}
                           </StatusBadge>
                         </td>
                         <td className="px-6 py-4">

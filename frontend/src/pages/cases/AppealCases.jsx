@@ -83,6 +83,18 @@ const AppealCases = () => {
     return JUDGMENT_TYPES.PENDING
   }
 
+  const getOutcomeFromJudgmentType = (judgmentType) => {
+    if (judgmentType === JUDGMENT_TYPES.CANCELED) return 1
+    if (judgmentType === JUDGMENT_TYPES.REJECTED) return 2
+    return 0
+  }
+
+  const OUTCOME_LABELS = {
+    1: 'كسب',
+    2: 'خسارة',
+    0: 'غير محدد',
+  }
+
   const breadcrumbs = [
     { label: 'الرئيسية', path: '/dashboard' },
     { label: 'القضايا الاستئنافية' }
@@ -170,6 +182,7 @@ const AppealCases = () => {
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الاستئناف</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من المستأنف</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap"> حكم الاستئناف</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">نتيجة القضية</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
                   </tr>
                 </thead>
@@ -179,6 +192,7 @@ const AppealCases = () => {
                     const appealJudgment = (caseItem.appealJudgment || '').toString().trim()
                     
                     const judgment = getJudgmentType(appealJudgment)
+                    const outcome = getOutcomeFromJudgmentType(judgment)
                     const canTransferToSupremeCourt =
                       appealJudgment === 'بتأييد الحكم' ||
                       appealJudgment === 'الغاء الحكم'
@@ -197,6 +211,11 @@ const AppealCases = () => {
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
                             {JUDGMENT_LABELS_APPEAL[judgment] || appealJudgment || 'غير محدد'}
+                          </StatusBadge>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <StatusBadge judgment={outcome}>
+                            {OUTCOME_LABELS[outcome]}
                           </StatusBadge>
                         </td>
                         <td className="px-6 py-4">
