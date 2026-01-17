@@ -82,10 +82,24 @@ const getJudgmentType = (judgment) => {
     return JUDGMENT_TYPES.PENDING
   }
 
-  const getOutcomeFromJudgmentType = (judgmentType) => {
-    if (judgmentType === JUDGMENT_TYPES.CANCELED) return 1
-    if (judgmentType === JUDGMENT_TYPES.REJECTED) return 2
-    return 0
+  const getAppealedParty = (value) => {
+    const v = (value || '').toString().trim()
+    if (!v) return null
+    if (v.includes('الشركة') || v.includes('شركة')) return 'company'
+    if (v.includes('هيئة') || v.includes('النقل')) return 'tga'
+    return null
+  }
+
+  const getOutcomeFromSupreme = (appealedBy, judgmentType) => {
+    if (judgmentType === JUDGMENT_TYPES.PENDING || judgmentType === JUDGMENT_TYPES.POSTPONED) return 0
+
+    const party = getAppealedParty(appealedBy)
+
+    const isWin =
+      (party === 'company' && judgmentType === JUDGMENT_TYPES.CANCELED) ||
+      (party === 'tga' && judgmentType === JUDGMENT_TYPES.ACCEPTED)
+
+    return isWin ? 1 : 2
   }
 
   const OUTCOME_LABELS = {
@@ -175,7 +189,7 @@ const getJudgmentType = (judgment) => {
                   {cases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.supremeRequestId
                     const judgment = getJudgmentType(caseItem.supremeCourtJudgment)
-                    const outcome = getOutcomeFromJudgmentType(judgment)
+                    const outcome = getOutcomeFromSupreme(caseItem.appealedBy, judgment)
                     return (
                       <tr 
                         key={caseId} 

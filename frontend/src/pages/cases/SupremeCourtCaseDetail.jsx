@@ -149,6 +149,33 @@ const SupremeCourtCaseDetail = () => {
     return 0
   }
 
+  const getSupremeJudgmentType = (value) => {
+    const v = (value || '').toString().toLowerCase().trim()
+    if (!v) return 'pending'
+    if (v.includes('تاجيل') || v.includes('تأجيل')) return 'postponed'
+    if (v.includes('بتأييد الحكم')) return 'accepted'
+    if (v.includes('الغاء') || v.includes('إلغاء') || v.includes('الغاء الحكم') || v.includes('الغاء القرار')) return 'canceled'
+    if (v.includes('رفض الدعوة')) return 'rejected'
+    return 'pending'
+  }
+
+  const getAppealedParty = (value) => {
+    const v = (value || '').toString().trim()
+    if (!v) return null
+    if (v.includes('الشركة') || v.includes('شركة')) return 'company'
+    if (v.includes('هيئة') || v.includes('النقل')) return 'tga'
+    return null
+  }
+
+  const getOutcomeFromSupreme = (appealedBy, supremeJudgmentText) => {
+    const t = getSupremeJudgmentType(supremeJudgmentText)
+    if (t === 'pending' || t === 'postponed') return 0
+
+    const party = getAppealedParty(appealedBy)
+    const isWin = (party === 'company' && t === 'canceled') || (party === 'tga' && t === 'accepted')
+    return isWin ? 1 : 2
+  }
+
   const OUTCOME_LABELS = {
     1: 'كسب',
     2: 'خسارة',
@@ -277,7 +304,7 @@ const SupremeCourtCaseDetail = () => {
                 </label>
                 <div className="mt-1">
                   {(() => {
-                    const outcome = getOutcomeFromRulingText(caseData.supremeCourtJudgment)
+                    const outcome = getOutcomeFromSupreme(caseData.appealedBy || caseData.appealed_by, caseData.supremeCourtJudgment)
                     return (
                       <StatusBadge judgment={outcome}>
                         {OUTCOME_LABELS[outcome]}
