@@ -161,9 +161,9 @@ const SupremeCourtCases = () => {
                   <tr>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم العليا</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ العليا</th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من  قام بالرفع</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">حكم العليا</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">نتيجة القضية</th>
-                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من  قام بالرفع</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الحالة</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
                   </tr>
@@ -183,6 +183,7 @@ const SupremeCourtCases = () => {
                           {caseItem.caseNumber || caseItem.supremeCaseNumber || caseId}
                         </td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.date || caseItem.supremeDate || caseItem.registrationDate) || 'غير محدد'}</td>
+                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
                             {JUDGMENT_LABELS[judgment] || caseItem.supremeCourtJudgment || 'غير محدد'}
@@ -193,7 +194,6 @@ const SupremeCourtCases = () => {
                             {OUTCOME_LABELS[outcome]}
                           </StatusBadge>
                         </td>
-                        <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge status={caseItem.status || 'active'}>
                             {caseItem.status === 'active' ? 'قيد النظر' : caseItem.status === 'pending' ? 'معلقة' : caseItem.status}
