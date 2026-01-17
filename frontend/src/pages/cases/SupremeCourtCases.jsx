@@ -5,7 +5,7 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Pagination from '../../components/ui/Pagination'
-import { USER_ROLES, JUDGMENT_TYPES, JUDGMENT_LABELS } from '../../utils/constants'
+import { USER_ROLES, JUDGMENT_TYPES, JUDGMENT_LABELS, JUDGMENT_LABELS_APPEAL } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
 import { formatDateHijri } from '../../utils/hijriDate'
@@ -63,7 +63,7 @@ const SupremeCourtCases = () => {
     }
   }
 
-  const getJudgmentType = (judgment) => {
+const getJudgmentType = (judgment) => {
     if (!judgment) return JUDGMENT_TYPES.PENDING
      
     const judgmentLower = judgment.toLowerCase()
@@ -72,6 +72,9 @@ const SupremeCourtCases = () => {
     }
     if (judgmentLower.includes('رفض الدعوة')) {
       return JUDGMENT_TYPES.REJECTED
+    }
+    if (judgmentLower.includes('بتأييد الحكم')) {
+      return JUDGMENT_TYPES.ACCEPTED
     }
     if (judgmentLower.includes('تاجيل') || judgmentLower.includes('تأجيل')) {
       return JUDGMENT_TYPES.POSTPONED
@@ -186,7 +189,7 @@ const SupremeCourtCases = () => {
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
-                            {JUDGMENT_LABELS[judgment] || caseItem.supremeCourtJudgment || 'غير محدد'}
+                            {JUDGMENT_LABELS_APPEAL[judgment] || caseItem.supremeCourtJudgment || 'غير محدد'}
                           </StatusBadge>
                         </td>
                         <td className="px-6 py-4 text-center">

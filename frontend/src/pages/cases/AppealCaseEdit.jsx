@@ -195,12 +195,43 @@ const AppealCaseEdit = () => {
         // Check if there's a primary case ID in query params
         const urlParams = new URLSearchParams(window.location.search)
         const primaryId = urlParams.get('primary')
-        const judgment = urlParams.get('judgment')
-        if (primaryId) {
-          setFormData(prev => ({ ...prev, caseRegistrationId: primaryId }))
+        const legacyJudgment = urlParams.get('judgment')
+
+        const getPrimaryOutcomeFromJudgmentText = (value) => {
+          const v = (value || '').toString().toLowerCase().trim()
+          if (!v) return 0
+          if (v.includes('الغاء') || v.includes('إلغاء') || v.includes('الغاء الحكم') || v.includes('الغاء القرار')) return 1
+          if (v.includes('رفض الدعوة')) return 2
+          return 0
         }
-         if (judgment) {
-          setFormData(prev => ({ ...prev, appealedBy: APPEALED_PARTIES_LABLES[judgment] }))
+
+        // Primary outcome is interpreted as: 1=company win, 2=company lose, 0=unspecified.
+        // Appellant should be the losing party.
+        const inferAppealedByFromPrimaryOutcome = (primaryOutcome) => {
+          if (primaryOutcome === 1) return APPEALED_PARTIES_LABLES[1]
+          if (primaryOutcome === 2) return APPEALED_PARTIES_LABLES[2]
+          return ''
+        }
+
+        if (primaryId) {
+          const selected = (response.data.data || []).find((c) => String(c?.id) === String(primaryId) || String(c?.assignedCaseRegistrationRequestId) === String(primaryId))
+          const primaryJudgmentText = selected?.firstInstanceJudgment || selected?.judgment || ''
+          const primaryOutcome = getPrimaryOutcomeFromJudgmentText(primaryJudgmentText)
+
+          setFormData(prev => ({
+            ...prev,
+            caseRegistrationId: primaryId,
+            appealedBy: prev.appealedBy || inferAppealedByFromPrimaryOutcome(primaryOutcome),
+          }))
+        }
+
+        // Backward-compatible fallback for existing links that pass ?judgment=1|2
+        if (legacyJudgment && (legacyJudgment === '1' || legacyJudgment === '2')) {
+          const legacyOutcome = parseInt(legacyJudgment, 10)
+          setFormData((prev) => ({
+            ...prev,
+            appealedBy: prev.appealedBy || inferAppealedByFromPrimaryOutcome(legacyOutcome),
+          }))
         }
       }
     } catch (err) {
@@ -360,7 +391,23 @@ const AppealCaseEdit = () => {
                       label="القضية الابتدائية المرتبطة"
                       value={formData.caseRegistrationId}
                       onChange={(e) => {
-                        handleChange('caseRegistrationId', e.target.value)
+                        const nextId = e.target.value
+                        handleChange('caseRegistrationId', nextId)
+                        if (nextId && isNew) {
+                          const selected = (primaryCases || []).find(
+                            (c) => String(c?.id) === String(nextId) || String(c?.assignedCaseRegistrationRequestId) === String(nextId)
+                          )
+                          const v = (selected?.firstInstanceJudgment || selected?.judgment || '').toString().toLowerCase().trim()
+                          const primaryOutcome = v.includes('الغاء') || v.includes('إلغاء') || v.includes('الغاء الحكم') || v.includes('الغاء القرار') ? 1 : v.includes('رفض الدعوة') ? 2 : 0
+                          const inferredAppealedBy = primaryOutcome === 1 ? APPEALED_PARTIES_LABLES[1] : primaryOutcome === 2 ? APPEALED_PARTIES_LABLES[2] : ''
+
+                          if (inferredAppealedBy) {
+                            setFormData((prev) => ({
+                              ...prev,
+                              appealedBy: prev.appealedBy || inferredAppealedBy,
+                            }))
+                          }
+                        }
                         if (errors.caseRegistrationId) setErrors(prev => ({ ...prev, caseRegistrationId: '' }))
                       }}
                       error={errors.caseRegistrationId}

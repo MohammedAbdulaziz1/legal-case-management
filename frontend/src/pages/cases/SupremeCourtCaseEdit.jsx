@@ -62,6 +62,55 @@ const SupremeCourtCaseEdit = () => {
     return ''
   }
 
+  const getAppealJudgmentType = (value) => {
+    const v = (value || '').toString().toLowerCase().trim()
+    if (!v) return 'pending'
+    if (v.includes('تاجيل') || v.includes('تأجيل')) return 'postponed'
+    if (v.includes('بتأييد الحكم')) return 'accepted'
+    if (v.includes('الغاء') || v.includes('إلغاء') || v.includes('الغاء الحكم') || v.includes('الغاء القرار')) return 'canceled'
+    if (v.includes('رفض الدعوة')) return 'rejected'
+    return 'pending'
+  }
+
+  const getAppealedParty = (value) => {
+    const v = (value || '').toString().trim()
+    if (!v) return null
+    if (v.includes('الشركة') || v.includes('شركة')) return 'company'
+    if (v.includes('هيئة') || v.includes('النقل')) return 'tga'
+    return null
+  }
+
+  // Appeal outcome is interpreted as: 1=company win, 2=company lose, 0=unspecified.
+  // Referral to Supreme Court should be filed by the losing party.
+  const getCompanyOutcomeFromAppeal = (appealedBy, appealJudgmentText) => {
+    const t = getAppealJudgmentType(appealJudgmentText)
+    if (t === 'pending' || t === 'postponed') return 0
+
+    // "Rejected" isn't part of the main win rules, but it still indicates a resolved outcome.
+    // We'll treat it like "accepted" (i.e., maintaining the underlying decision), since UI options
+    // mainly use accepted/canceled.
+    if (t === 'rejected') {
+      const party = getAppealedParty(appealedBy)
+      if (!party) return 0
+      return party === 'company' ? 2 : 1
+    }
+
+    if (t === 'canceled') return 1
+    if (t === 'accepted') {
+      const party = getAppealedParty(appealedBy)
+      if (!party) return 0
+      return party === 'company' ? 2 : 1
+    }
+
+    return 0
+  }
+
+  const inferAppealedByFromAppealCompanyOutcome = (companyOutcome) => {
+    if (companyOutcome === 1) return APPEALED_PARTIES_LABLES[1]
+    if (companyOutcome === 2) return APPEALED_PARTIES_LABLES[2]
+    return ''
+  }
+
   // Redirect viewers to detail page (defense in depth)
   useEffect(() => {
     if (currentUser?.role === USER_ROLES.VIEWER) {
@@ -183,9 +232,23 @@ const SupremeCourtCaseEdit = () => {
     }
   }
 
+  const applyAppealPrefill = (allAppeals, appealId) => {
+    const selected = (allAppeals || []).find(
+      (c) => String(c?.id) === String(appealId) || String(c?.appealRequestId) === String(appealId)
+    )
+
+    const companyOutcome = getCompanyOutcomeFromAppeal(selected?.appealedBy, selected?.appealJudgment)
+    const inferredAppealedBy = inferAppealedByFromAppealCompanyOutcome(companyOutcome)
+
+    setFormData((prev) => ({
+      ...prev,
+      appealId,
+      appealedBy: prev.appealedBy || inferredAppealedBy,
+    }))
+  }
+
   const fetchAppealCases = async () => {
     try {
-      // Fetch all appeal cases for the searchable dropdown
       const response = await caseService.getAppealCases({ per_page: 1000 })
       if (response.data.success) {
         setAppealCases(response.data.data || [])
@@ -193,7 +256,7 @@ const SupremeCourtCaseEdit = () => {
         const urlParams = new URLSearchParams(window.location.search)
         const appealId = urlParams.get('appeal')
         if (appealId) {
-          setFormData(prev => ({ ...prev, appealId }))
+          applyAppealPrefill(response.data.data || [], appealId)
         }
       }
     } catch (err) {
@@ -242,6 +305,14 @@ const SupremeCourtCaseEdit = () => {
     { label: isNew ? 'إضافة قضية جديدة' : `تعديل القضية ${formData.caseNumber}` }
   ]
 
+  const supremeJudgmentOptions = (() => {
+    const fromRelated = (appealCases || []).map((c) => (c?.appealJudgment || '').toString().trim()).filter(Boolean)
+    const fallback = ['قيد المعالجة', 'بتأييد الحكم', 'الغاء الحكم']
+    const current = (formData.supremeCourtJudgment || '').toString().trim()
+    const all = [...fromRelated, ...fallback, current].filter(Boolean)
+    return Array.from(new Set(all)).map((v) => ({ value: v, label: v }))
+  })()
+
   const handleChange = (field, value) => {
     setFormData(prev => ({ ...prev, [field]: value }))
     // Clear error for this field when user types
@@ -261,6 +332,7 @@ const SupremeCourtCaseEdit = () => {
     const validationErrors = {}
     if (!formData.caseNumber) validationErrors.caseNumber = 'رقم القضية مطلوب'
     if (!formData.registrationDate) validationErrors.registrationDate = 'تاريخ التسجيل مطلوب'
+    if (!formData.supremeCourtJudgment) validationErrors.supremeCourtJudgment = 'حكم المحكمة العليا مطلوب'
     if (!formData.judgementdate) validationErrors.judgementdate = 'تاريخ الحكم مطلوب'
     if (!formData.judgementrecivedate) validationErrors.judgementrecivedate = 'تاريخ استلام الحكم مطلوب'
     if (!formData.appealedBy) validationErrors.appealedBy = 'من قام بالرفع مطلوب'
@@ -349,7 +421,19 @@ const SupremeCourtCaseEdit = () => {
                       label="قضية الاستئناف المرتبطة"
                       value={formData.appealId}
                       onChange={(e) => {
-                        handleChange('appealId', e.target.value)
+                        const nextId = e.target.value
+                        handleChange('appealId', nextId)
+                        if (nextId && isNew) {
+                          const selected = (appealCases || []).find(
+                            (c) => String(c?.id) === String(nextId) || String(c?.appealRequestId) === String(nextId)
+                          )
+                          const companyOutcome = getCompanyOutcomeFromAppeal(selected?.appealedBy, selected?.appealJudgment)
+                          const inferredAppealedBy = inferAppealedByFromAppealCompanyOutcome(companyOutcome)
+                          setFormData((prev) => ({
+                            ...prev,
+                            appealedBy: prev.appealedBy || inferredAppealedBy,
+                          }))
+                        }
                         if (errors.appealId) setErrors(prev => ({ ...prev, appealId: '' }))
                       }}
                       error={errors.appealId}
@@ -413,11 +497,19 @@ const SupremeCourtCaseEdit = () => {
                   required
                   hijriOnly={true}
                 />
-                 <Input
-                  label=" حكم  العليا"
+                 <Select
+                  label="حكم المحكمة العليا"
                   value={formData.supremeCourtJudgment}
-                  onChange={(e) => handleChange('supremeCourtJudgment', e.target.value)}
+                  onChange={(e) => {
+                    handleChange('supremeCourtJudgment', e.target.value)
+                    if (errors.supremeCourtJudgment) setErrors(prev => ({ ...prev, supremeCourtJudgment: '' }))
+                  }}
+                  error={errors.supremeCourtJudgment}
                   required
+                  options={[
+                    { value: '', label: 'اختر الحكم' },
+                    ...supremeJudgmentOptions,
+                  ]}
                 />
                  <DualDateInput
                   label="تاريخ الحكم"
