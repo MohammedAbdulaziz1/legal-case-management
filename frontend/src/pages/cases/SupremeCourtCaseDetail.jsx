@@ -3,8 +3,6 @@ import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
-import Input from '../../components/common/Input'
-import DualDateInput from '../../components/common/DualDateInput'
 import StatusBadge from '../../components/ui/StatusBadge'
 import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
@@ -23,10 +21,6 @@ const SupremeCourtCaseDetail = () => {
   const [sessionsLoading, setSessionsLoading] = useState(false)
   const [sessionsError, setSessionsError] = useState(null)
   const [sessions, setSessions] = useState([])
-  const [isSessionModalOpen, setIsSessionModalOpen] = useState(false)
-  const [editingSession, setEditingSession] = useState(null)
-  const [sessionForm, setSessionForm] = useState({ sessionDate: '', notes: '' })
-  const [sessionFormErrors, setSessionFormErrors] = useState({})
 
   useEffect(() => {
     if (id) {
@@ -79,80 +73,6 @@ const SupremeCourtCaseDetail = () => {
       setSessionsError('فشل في تحميل الجلسات')
     } finally {
       setSessionsLoading(false)
-    }
-  }
-
-  const openAddSessionModal = () => {
-    setEditingSession(null)
-    setSessionForm({ sessionDate: '', notes: '' })
-    setSessionFormErrors({})
-    setIsSessionModalOpen(true)
-  }
-
-  const openEditSessionModal = (s) => {
-    setEditingSession(s)
-    setSessionForm({
-      sessionDate: s.sessionDate || '',
-      notes: s.notes || '',
-    })
-    setSessionFormErrors({})
-    setIsSessionModalOpen(true)
-  }
-
-  const closeSessionModal = () => {
-    setIsSessionModalOpen(false)
-    setEditingSession(null)
-    setSessionForm({ sessionDate: '', notes: '' })
-    setSessionFormErrors({})
-  }
-
-  const handleSaveSession = async () => {
-    const nextErrors = {}
-    if (!sessionForm.sessionDate) nextErrors.sessionDate = 'تاريخ الجلسة مطلوب'
-    if (Object.keys(nextErrors).length > 0) {
-      setSessionFormErrors(nextErrors)
-      return
-    }
-
-    const n = caseData.caseNumber || caseData.supremeCaseNumber
-
-    try {
-      if (editingSession?.id) {
-        await sessionService.updateSession(editingSession.id, {
-          sessionDate: sessionForm.sessionDate,
-          notes: sessionForm.notes,
-        })
-      } else {
-        await sessionService.createSession({
-          caseType: 'supreme',
-          caseNumber: n,
-          sessionDate: sessionForm.sessionDate,
-          notes: sessionForm.notes,
-        })
-      }
-
-      closeSessionModal()
-      await fetchSessions(n)
-    } catch (err) {
-      console.error('Error saving session:', err)
-      const msg = err.response?.data?.message || 'فشل في حفظ الجلسة'
-      alert(msg)
-    }
-  }
-
-  const handleDeleteSession = async (s) => {
-    if (!s?.id) return
-    const ok = window.confirm('هل أنت متأكد من حذف هذه الجلسة؟')
-    if (!ok) return
-
-    const n = caseData.caseNumber || caseData.supremeCaseNumber
-    try {
-      await sessionService.deleteSession(s.id)
-      await fetchSessions(n)
-    } catch (err) {
-      console.error('Error deleting session:', err)
-      const msg = err.response?.data?.message || 'فشل في حذف الجلسة'
-      alert(msg)
     }
   }
 
@@ -452,13 +372,6 @@ const SupremeCourtCaseDetail = () => {
           <Card
             title="الجلسات"
             icon="event"
-            headerActions={
-              currentUser?.role !== USER_ROLES.VIEWER ? (
-                <Button variant="primary" icon="add" onClick={openAddSessionModal}>
-                  إضافة جلسة
-                </Button>
-              ) : null
-            }
           >
             {sessionsLoading ? (
               <div className="p-4 text-sm text-slate-500 dark:text-slate-400">جاري تحميل الجلسات...</div>
@@ -473,9 +386,6 @@ const SupremeCourtCaseDetail = () => {
                     <tr>
                       <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
                       <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">ملاحظات</th>
-                      {currentUser?.role !== USER_ROLES.VIEWER && (
-                        <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
-                      )}
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -483,28 +393,6 @@ const SupremeCourtCaseDetail = () => {
                       <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-4 py-3 whitespace-nowrap text-slate-900 dark:text-slate-100">{formatDateHijri(s.sessionDate) || 'غير محدد'}</td>
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{s.notes || '—'}</td>
-                        {currentUser?.role !== USER_ROLES.VIEWER && (
-                          <td className="px-4 py-3">
-                            <div className="flex items-center justify-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => openEditSessionModal(s)}
-                                className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200"
-                                title="تعديل"
-                              >
-                                <span className="material-symbols-outlined text-lg">edit</span>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteSession(s)}
-                                className="p-2 rounded-lg bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/30 text-red-600 dark:text-red-300"
-                                title="حذف"
-                              >
-                                <span className="material-symbols-outlined text-lg">delete</span>
-                              </button>
-                            </div>
-                          </td>
-                        )}
                       </tr>
                     ))}
                   </tbody>
@@ -555,69 +443,6 @@ const SupremeCourtCaseDetail = () => {
           </Card>
         </div>
       </div>
-
-      {isSessionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40" onClick={closeSessionModal}>
-          <div
-            className="w-full max-w-xl bg-white dark:bg-slate-900 rounded-xl shadow-xl border border-slate-200 dark:border-slate-800"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-slate-800">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                {editingSession ? 'تعديل جلسة' : 'إضافة جلسة'}
-              </h3>
-              <button
-                type="button"
-                onClick={closeSessionModal}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
-                title="إغلاق"
-              >
-                <span className="material-symbols-outlined">close</span>
-              </button>
-            </div>
-
-            <div className="p-5 space-y-4">
-              <DualDateInput
-                label="تاريخ الجلسة"
-                value={sessionForm.sessionDate}
-                onChange={(val) => {
-                  setSessionForm((p) => ({ ...p, sessionDate: val }))
-                  if (sessionFormErrors.sessionDate) setSessionFormErrors((p) => ({ ...p, sessionDate: '' }))
-                }}
-                error={sessionFormErrors.sessionDate}
-                required
-                hijriOnly
-              />
-
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">ملاحظات</label>
-                <textarea
-                  value={sessionForm.notes}
-                  onChange={(e) => setSessionForm((p) => ({ ...p, notes: e.target.value }))}
-                  placeholder="أدخل ملاحظات الجلسة (اختياري)"
-                  rows={4}
-                  className="w-full rounded-lg border py-2.5 pr-4 pl-4 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50 focus:border-primary transition-shadow"
-                />
-              </div>
-
-              <Input
-                label="رقم العليا"
-                value={(caseData.caseNumber || caseData.supremeCaseNumber || '')}
-                disabled
-              />
-            </div>
-
-            <div className="flex justify-end gap-3 px-5 py-4 border-t border-slate-200 dark:border-slate-800">
-              <Button variant="secondary" icon="close" onClick={closeSessionModal}>
-                إلغاء
-              </Button>
-              <Button variant="primary" icon="save" onClick={handleSaveSession}>
-                حفظ
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </Layout>
   )
 }
