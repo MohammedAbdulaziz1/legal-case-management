@@ -4,6 +4,7 @@ import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
+import CaseDocuments from '../../components/cases/CaseDocuments'
 import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { sessionService } from '../../services/sessionService'
@@ -470,6 +471,8 @@ const AppealCaseDetail = () => {
               </div>
             </div>
           </Card>
+
+          <CaseDocuments caseType="appeal" caseId={id} />
         </div>
       </div>
     </Layout>

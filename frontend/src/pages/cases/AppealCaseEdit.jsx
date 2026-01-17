@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Layout from '../../components/layout/Layout'
 import Card from '../../components/common/Card'
@@ -7,6 +7,7 @@ import DualDateInput from '../../components/common/DualDateInput'
 import Select from '../../components/common/Select'
 import SearchableSelect from '../../components/common/SearchableSelect'
 import Button from '../../components/common/Button'
+import CaseDocuments from '../../components/cases/CaseDocuments'
 import { APPEALED_PARTIES_LABLES, CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { sessionService } from '../../services/sessionService'
@@ -19,6 +20,7 @@ const AppealCaseEdit = () => {
   const { user: currentUser } = useAuth()
   const isNew = id === 'new' || !id
   const [loading, setLoading] = useState(!isNew)
+  const documentsRef = useRef(null)
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
@@ -282,8 +284,16 @@ const AppealCaseEdit = () => {
     
     setErrors({})
     try {
+      let savedCaseId = id
+      
       if (isNew) {
-        await caseService.createAppealCase(formData)
+        const response = await caseService.createAppealCase(formData)
+        savedCaseId = response.data?.data?.appealRequestId || response.data?.data?.id
+        
+        // Upload pending documents if any
+        if (documentsRef.current && savedCaseId) {
+          await documentsRef.current.uploadPendingFiles(savedCaseId)
+        }
       } else {
         await caseService.updateAppealCase(id, formData)
       }
@@ -622,22 +632,7 @@ const AppealCaseEdit = () => {
 
           
 
-             <Card title="المرفقات" className="p-6">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700">
-                  <div className="flex items-center gap-3">
-                    <span className="material-symbols-outlined text-red-500">picture_as_pdf</span>
-                    <div className="flex flex-col">
-                      <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">لائحة الدعوى.pdf</span>
-                      <span className="text-[10px] text-slate-400">2.4 MB</span>
-                    </div>
-                  </div>
-                  <button className="text-slate-400 hover:text-red-500 transition-colors">
-                    <span className="material-symbols-outlined text-lg">delete</span>
-                  </button>
-                </div>
-              </div>
-            </Card>
+             <CaseDocuments ref={documentsRef} caseType="appeal" caseId={id} />
             
               {!isNew ? (
                 <Card className="p-6 sticky top-6">
