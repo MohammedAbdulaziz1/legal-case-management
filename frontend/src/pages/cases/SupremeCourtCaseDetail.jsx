@@ -141,6 +141,20 @@ const SupremeCourtCaseDetail = () => {
     }
   }
 
+  const getOutcomeFromRulingText = (value) => {
+    const v = (value || '').toString().toLowerCase().trim()
+    if (!v) return 0
+    if (v.includes('الغاء') || v.includes('إلغاء') || v.includes('الغاء الحكم') || v.includes('الغاء القرار')) return 1
+    if (v.includes('رفض الدعوة')) return 2
+    return 0
+  }
+
+  const OUTCOME_LABELS = {
+    1: 'كسب',
+    2: 'خسارة',
+    0: 'غير محدد',
+  }
+
   const breadcrumbs = [
     { label: 'الرئيسية', path: '/dashboard' },
     { label: 'قضايا المحكمة العليا', path: '/cases/supreme' },
@@ -256,6 +270,21 @@ const SupremeCourtCaseDetail = () => {
                 <p className="text-base text-slate-900 dark:text-white">
                   {caseData.supremeCourtJudgment || 'غير محدد'}
                 </p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  نتيجة القضية
+                </label>
+                <div className="mt-1">
+                  {(() => {
+                    const outcome = getOutcomeFromRulingText(caseData.supremeCourtJudgment)
+                    return (
+                      <StatusBadge judgment={outcome}>
+                        {OUTCOME_LABELS[outcome]}
+                      </StatusBadge>
+                    )
+                  })()}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">

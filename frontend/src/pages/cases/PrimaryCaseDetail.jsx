@@ -152,6 +152,20 @@ const PrimaryCaseDetail = () => {
     return JUDGMENT_TYPES.PENDING
   }
 
+  const getOutcomeFromRulingText = (value) => {
+    const v = (value || '').toString().toLowerCase().trim()
+    if (!v) return 0
+    if (v.includes('الغاء') || v.includes('إلغاء') || v.includes('الغاء الحكم') || v.includes('الغاء القرار')) return 1
+    if (v.includes('رفض الدعوة')) return 2
+    return 0
+  }
+
+  const OUTCOME_LABELS = {
+    1: 'كسب',
+    2: 'خسارة',
+    0: 'غير محدد',
+  }
+
   const breadcrumbs = [
     { label: 'الرئيسية', path: '/dashboard' },
     { label: 'القضايا الابتدائية', path: '/cases/primary' },
@@ -196,7 +210,9 @@ const PrimaryCaseDetail = () => {
     )
   }
 
-  const judgment = getJudgmentType(caseData.firstInstanceJudgment || caseData.judgment)
+  const rulingText = caseData.firstInstanceJudgment || caseData.judgment
+  const judgment = getJudgmentType(rulingText)
+  const outcome = getOutcomeFromRulingText(rulingText)
   const { lastSessionDate, nextSessionDate } = getSessionSummary(sessions)
 
   return (
@@ -356,7 +372,17 @@ const PrimaryCaseDetail = () => {
                 </label>
                 <div className="mt-1">
                   <StatusBadge judgment={judgment}>
-                    {JUDGMENT_LABELS[judgment] || caseData.firstInstanceJudgment || caseData.judgment || 'قيد النظر'}
+                    {JUDGMENT_LABELS[judgment] || rulingText || 'قيد النظر'}
+                  </StatusBadge>
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">
+                  نتيجة القضية
+                </label>
+                <div className="mt-1">
+                  <StatusBadge judgment={outcome}>
+                    {OUTCOME_LABELS[outcome]}
                   </StatusBadge>
                 </div>
               </div>
