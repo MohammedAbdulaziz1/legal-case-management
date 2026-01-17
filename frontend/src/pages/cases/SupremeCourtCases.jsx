@@ -202,7 +202,7 @@ const getJudgmentType = (judgment) => {
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.date || caseItem.supremeDate || caseItem.registrationDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
-                          <StatusBadge judgment={judgment}>
+                          <StatusBadge judgment={outcome}>
                             {JUDGMENT_LABELS_APPEAL[judgment] || caseItem.supremeCourtJudgment || 'غير محدد'}
                           </StatusBadge>
                         </td>

@@ -223,7 +223,7 @@ const AppealCases = () => {
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{formatDateHijri(caseItem.registrationDate || caseItem.appealDate) || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
-                          <StatusBadge judgment={judgment}>
+                          <StatusBadge judgment={outcome}>
                             {JUDGMENT_LABELS_APPEAL[judgment] || appealJudgment || 'غير محدد'}
                           </StatusBadge>
                         </td>
