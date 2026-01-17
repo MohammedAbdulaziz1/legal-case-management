@@ -83,10 +83,24 @@ const AppealCases = () => {
     return JUDGMENT_TYPES.PENDING
   }
 
-  const getOutcomeFromJudgmentType = (judgmentType) => {
-    if (judgmentType === JUDGMENT_TYPES.CANCELED) return 1
-    if (judgmentType === JUDGMENT_TYPES.REJECTED) return 2
-    return 0
+  const getAppealedParty = (value) => {
+    const v = (value || '').toString().trim()
+    if (!v) return null
+    if (v.includes('الشركة') || v.includes('شركة')) return 'company'
+    if (v.includes('هيئة') || v.includes('النقل')) return 'tga'
+    return null
+  }
+
+  const getOutcomeFromAppeal = (appealedBy, judgmentType) => {
+    if (judgmentType === JUDGMENT_TYPES.PENDING || judgmentType === JUDGMENT_TYPES.POSTPONED) return 0
+
+    const party = getAppealedParty(appealedBy)
+
+    const isWin =
+      (party === 'company' && judgmentType === JUDGMENT_TYPES.CANCELED) ||
+      (party === 'tga' && judgmentType === JUDGMENT_TYPES.ACCEPTED)
+
+    return isWin ? 1 : 2
   }
 
   const OUTCOME_LABELS = {
@@ -192,7 +206,7 @@ const AppealCases = () => {
                     const appealJudgment = (caseItem.appealJudgment || '').toString().trim()
                     
                     const judgment = getJudgmentType(appealJudgment)
-                    const outcome = getOutcomeFromJudgmentType(judgment)
+                    const outcome = getOutcomeFromAppeal(caseItem.appealedBy, judgment)
                     const canTransferToSupremeCourt =
                       appealJudgment === 'بتأييد الحكم' ||
                       appealJudgment === 'الغاء الحكم'
