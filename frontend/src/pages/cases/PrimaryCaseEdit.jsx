@@ -236,7 +236,7 @@ const PrimaryCaseEdit = () => {
                   value={formData.registrationDate}
                   onChange={(val) => handleChange('registrationDate', val)}
                   required
-                  hijriOnly={isNew}
+                  hijriOnly={true}
                 />
                
                 {/* <Input
@@ -328,6 +328,7 @@ const PrimaryCaseEdit = () => {
                     { value: 'تاجيل', label: 'تاجيل' },
                     { value: 'قيد المعالجة', label: 'قيدالمعالجة' }
                   ]}
+                  required
                 />
                  <DualDateInput
                   label="تاريخ الحكم"
@@ -337,7 +338,7 @@ const PrimaryCaseEdit = () => {
                     if (errors.judgementdate) setErrors(prev => ({ ...prev, judgementdate: '' }))
                   }}
                   error={errors.judgementdate}
-                  hijriOnly={isNew}
+                  hijriOnly={true}
                 />
                 <DualDateInput
                   label="تاريخ استلام الحكم"
@@ -347,7 +348,7 @@ const PrimaryCaseEdit = () => {
                     if (errors.judgementrecivedate) setErrors(prev => ({ ...prev, judgementrecivedate: '' }))
                   }}
                   error={errors.judgementrecivedate}
-                  hijriOnly={isNew}
+                  hijriOnly={true}
                 />
                 {/* <Input
                   label="تاريخ الجلسة القادمة"
