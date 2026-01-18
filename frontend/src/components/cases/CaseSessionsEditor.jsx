@@ -223,6 +223,7 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
                     })
                   }
                 }}
+                hijriOnly={true}
               />
               {sessionFormErrors.sessionDate && (
                 <p className="text-xs text-red-600 dark:text-red-400 -mt-2">{sessionFormErrors.sessionDate}</p>

@@ -58,7 +58,7 @@ const AppealCases = () => {
     const toLocalDate = (value) => {
       if (!value) return null
       if (typeof value === 'string') {
-        const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+        const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})/)
         if (m) {
           const y = parseInt(m[1], 10)
           const mo = parseInt(m[2], 10)
@@ -81,7 +81,7 @@ const AppealCases = () => {
         })
         .filter(Boolean)
         .sort((a, b) => a.date.getTime() - b.date.getTime())
-
+        console.log('items', items)
       if (items.length === 0) return null
 
       const today = new Date()
@@ -117,12 +117,20 @@ const AppealCases = () => {
           try {
             const resp = await sessionService.getSessions({
               case_type: 'appeal',
-              case_number: caseNumber,
+              case_number: typeof caseNumber === 'string' ? parseInt(caseNumber) : caseNumber,
               per_page: 100,
             })
+            if (!resp?.data?.success) {
+              current[caseId] = { nextSessionDate: null, remainingDays: null }
+              return
+            }
+
             const sessions = resp?.data?.data || []
+            console.log('sessions', sessions)
             const nextDate = getNextSessionDate(sessions)
+            console.log('nextDate', nextDate)
             const remaining = daysUntil(nextDate)
+            console.log('remaining', remaining)
             current[caseId] = { nextSessionDate: nextDate, remainingDays: remaining }
           } catch {
             current[caseId] = { nextSessionDate: null, remainingDays: null }
@@ -138,7 +146,7 @@ const AppealCases = () => {
     return () => {
       cancelled = true
     }
-  }, [selectedTab, currentPage, sortBy, sortOrder])
+  }, [selectedTab, cases, currentPage, sortBy, sortOrder])
 
   const fetchCases = async () => {
     try {
