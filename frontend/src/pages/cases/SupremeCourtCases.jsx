@@ -5,10 +5,11 @@ import Card from '../../components/common/Card'
 import Button from '../../components/common/Button'
 import StatusBadge from '../../components/ui/StatusBadge'
 import Pagination from '../../components/ui/Pagination'
-import { USER_ROLES, JUDGMENT_TYPES, JUDGMENT_LABELS, JUDGMENT_LABELS_APPEAL } from '../../utils/constants'
+import { CASE_STATUSES, USER_ROLES, JUDGMENT_TYPES, JUDGMENT_LABELS, JUDGMENT_LABELS_APPEAL } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
 import { useAuth } from '../../context/AuthContext'
 import { formatDateHijri } from '../../utils/hijriDate'
+import { sessionService } from '../../services/sessionService'
 
 const SupremeCourtCases = () => {
   const navigate = useNavigate()
@@ -21,10 +22,122 @@ const SupremeCourtCases = () => {
   const [error, setError] = useState(null)
   const [sortBy, setSortBy] = useState('created_at')
   const [sortOrder, setSortOrder] = useState('asc')
+  const [selectedTab, setSelectedTab] = useState('all')
+  const [nextSessionById, setNextSessionById] = useState({})
 
   useEffect(() => {
     fetchCases()
   }, [currentPage, sortBy, sortOrder])
+
+  const displayedCases = (() => {
+    let list = Array.isArray(cases) ? [...cases] : []
+
+    if (selectedTab === 'under_process') {
+      list = list.filter((c) => {
+        const st = (c?.status || '').toString()
+        const statusUnderProcess =
+          st === CASE_STATUSES.ACTIVE || st === CASE_STATUSES.PENDING || st === CASE_STATUSES.POSTPONED
+        return statusUnderProcess && !isCaseDecided(c)
+      })
+    }
+
+    if (selectedTab === 'judgment_issued') {
+      list = list.filter((c) => {
+        const st = (c?.status || '').toString()
+        return st === CASE_STATUSES.JUDGMENT || st === CASE_STATUSES.CLOSED
+      })
+    }
+
+    return list
+  })()
+
+  useEffect(() => {
+    let cancelled = false
+
+    const toLocalDate = (value) => {
+      if (!value) return null
+      if (typeof value === 'string') {
+        const m = value.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+        if (m) {
+          const y = parseInt(m[1], 10)
+          const mo = parseInt(m[2], 10)
+          const d = parseInt(m[3], 10)
+          const dt = new Date(y, mo - 1, d)
+          if (!Number.isNaN(dt.getTime())) return dt
+        }
+      }
+      const dt = new Date(value)
+      if (Number.isNaN(dt.getTime())) return null
+      return dt
+    }
+
+    const getNextSessionDate = (sessionsList) => {
+      const items = (sessionsList || [])
+        .map((s) => {
+          const d = toLocalDate(s?.sessionDate)
+          if (!d) return null
+          return { date: d, sessionDate: s.sessionDate }
+        })
+        .filter(Boolean)
+        .sort((a, b) => a.date.getTime() - b.date.getTime())
+
+      if (items.length === 0) return null
+
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+
+      for (const it of items) {
+        if (it.date.getTime() > today.getTime()) return it.sessionDate
+      }
+      return null
+    }
+
+    const daysUntil = (isoDate) => {
+      const d = toLocalDate(isoDate)
+      if (!d) return null
+      const today = new Date()
+      today.setHours(0, 0, 0, 0)
+      d.setHours(0, 0, 0, 0)
+      const diff = Math.ceil((d.getTime() - today.getTime()) / (1000 * 60 * 60 * 24))
+      return diff
+    }
+
+    const load = async () => {
+      if (selectedTab !== 'under_process') return
+
+      const current = {}
+
+      await Promise.all(
+        (displayedCases || []).map(async (c) => {
+          const caseId = c?.id || c?.supremeRequestId
+          const caseNumber = c?.caseNumber || c?.supremeCaseNumber
+          if (!caseId || !caseNumber) return
+
+          try {
+            const resp = await sessionService.getSessions({
+              case_type: 'supreme',
+              case_number: caseNumber,
+              per_page: 100,
+            })
+            const sessions = resp?.data?.data || []
+            const nextDate = getNextSessionDate(sessions)
+            const remaining = daysUntil(nextDate)
+            current[caseId] = { nextSessionDate: nextDate, remainingDays: remaining }
+          } catch {
+            current[caseId] = { nextSessionDate: null, remainingDays: null }
+          }
+        })
+      )
+
+      if (cancelled) return
+      setNextSessionById(current)
+    }
+
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [selectedTab, currentPage, sortBy, sortOrder])
 
   const fetchCases = async () => {
     try {
@@ -82,6 +195,12 @@ const getJudgmentType = (judgment) => {
     return JUDGMENT_TYPES.PENDING
   }
 
+  const isCaseDecided = (caseItem) => {
+    const judgmentText = (caseItem?.supremeCourtJudgment || '').toString().trim()
+    const t = getJudgmentType(judgmentText)
+    return t !== JUDGMENT_TYPES.PENDING && t !== JUDGMENT_TYPES.POSTPONED
+  }
+
   const getAppealedParty = (value) => {
     const v = (value || '').toString().trim()
     if (!v) return null
@@ -134,6 +253,50 @@ const getJudgmentType = (judgment) => {
       <Card className="p-4 mb-6">
         <div className="flex flex-col lg:flex-row gap-4 justify-end">
           <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTab('all')
+                  setCurrentPage(1)
+                }}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                  selectedTab === 'all'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                الكل
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTab('under_process')
+                  setCurrentPage(1)
+                }}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                  selectedTab === 'under_process'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                قيد الإجراء
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedTab('judgment_issued')
+                  setCurrentPage(1)
+                }}
+                className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-colors ${
+                  selectedTab === 'judgment_issued'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                صدر الحكم
+              </button>
+            </div>
             <div className="h-8 w-px bg-slate-200 dark:bg-slate-700 hidden lg:block mx-1"></div>
             <Button variant="secondary" size="sm" icon="sort" onClick={() => {
               setSortBy(prev => prev || 'created_at')
@@ -160,7 +323,7 @@ const getJudgmentType = (judgment) => {
               إعادة المحاولة
             </Button>
           </div>
-        ) : cases.length === 0 ? (
+        ) : displayedCases.length === 0 ? (
           <div className="p-8 text-center">
             <span className="material-symbols-outlined text-slate-400 text-4xl mb-4">account_balance</span>
             <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">لا توجد قضايا</p>
@@ -178,6 +341,21 @@ const getJudgmentType = (judgment) => {
                   <tr>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">رقم العليا</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ العليا</th>
+
+                    {selectedTab === 'under_process' && (
+                      <>
+                        <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الجلسة القادمة</th>
+                        <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الأيام المتبقية</th>
+                      </>
+                    )}
+
+                    {selectedTab === 'judgment_issued' && (
+                      <>
+                        <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">تاريخ استلام الحكم</th>
+                        <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الأيام المتبقية للاستئناف</th>
+                      </>
+                    )}
+
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">من  قام بالرفع</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">حكم العليا</th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">نتيجة القضية</th>
@@ -186,10 +364,27 @@ const getJudgmentType = (judgment) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {cases.map((caseItem) => {
+                  {displayedCases.map((caseItem) => {
                     const caseId = caseItem.id || caseItem.supremeRequestId
                     const judgment = getJudgmentType(caseItem.supremeCourtJudgment)
                     const outcome = getOutcomeFromSupreme(caseItem.appealedBy, judgment)
+                    const appealRemainingDays = (() => {
+                      const value = caseItem?.judgementrecivedate
+                      if (!value) return null
+                      const m = value.toString().trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
+                      if (!m) return null
+                      const y = parseInt(m[1], 10)
+                      const mo = parseInt(m[2], 10)
+                      const d = parseInt(m[3], 10)
+                      const received = new Date(y, mo - 1, d)
+                      if (Number.isNaN(received.getTime())) return null
+                      const today = new Date()
+                      today.setHours(0, 0, 0, 0)
+                      received.setHours(0, 0, 0, 0)
+                      const passed = Math.floor((today.getTime() - received.getTime()) / (1000 * 60 * 60 * 24))
+                      const rem = 30 - passed
+                      return rem
+                    })()
                     return (
                       <tr 
                         key={caseId} 
@@ -200,6 +395,36 @@ const getJudgmentType = (judgment) => {
                           {caseItem.caseNumber || caseItem.supremeCaseNumber || caseId}
                         </td>
                         <td className="px-6 py-4 text-slate-600 dark:text-slate-400 whitespace-nowrap">{formatDateHijri(caseItem.date || caseItem.supremeDate || caseItem.registrationDate) || 'غير محدد'}</td>
+
+                        {selectedTab === 'under_process' && (
+                          <>
+                            <td className="px-6 py-4 text-center text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                              {formatDateHijri(nextSessionById?.[caseId]?.nextSessionDate) || 'غير محدد'}
+                            </td>
+                            <td className="px-6 py-4 text-center text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                              {(() => {
+                                const v = nextSessionById?.[caseId]?.remainingDays
+                                if (v === null || v === undefined) return 'غير محدد'
+                                return v <= 0 ? 0 : v
+                              })()}
+                            </td>
+                          </>
+                        )}
+
+                        {selectedTab === 'judgment_issued' && (
+                          <>
+                            <td className="px-6 py-4 text-center text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                              {formatDateHijri(caseItem.judgementrecivedate) || 'غير محدد'}
+                            </td>
+                            <td className="px-6 py-4 text-center text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                              {(() => {
+                                if (appealRemainingDays === null || appealRemainingDays === undefined) return 'غير محدد'
+                                return appealRemainingDays <= 0 ? 0 : appealRemainingDays
+                              })()}
+                            </td>
+                          </>
+                        )}
+
                         <td className="px-6 py-4 text-slate-900 dark:text-slate-100 whitespace-nowrap">{caseItem.appealedBy || 'غير محدد'}</td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={outcome}>

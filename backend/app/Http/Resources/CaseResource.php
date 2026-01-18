@@ -24,6 +24,8 @@ class CaseResource extends JsonResource
             'court' => "المحكمة الابتدائية - الدائرة {$this->court_number}",
             'judge' => $this->judge,
             'firstInstanceJudgment' => $this->first_instance_judgment,
+            'judgementdate' => $this->judgementdate?->format('Y-m-d'),
+            'judgementrecivedate' => $this->judgementrecivedate?->format('Y-m-d'),
             'status' => $this->status,
             'notes' => $this->notes,
             'createdAt' => $this->created_at?->format('Y-m-d H:i:s'),
