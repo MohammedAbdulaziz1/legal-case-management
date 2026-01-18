@@ -300,6 +300,14 @@ const SupremeCourtCaseEdit = () => {
               : 'يرجى تحديث البيانات بدقة، سيتم حفظ نسخة من البيانات القديمة في الأرشيف.'}
           </p>
         </div>
+        <div className="flex gap-3">
+          <Button variant="secondary" icon="close" onClick={() => navigate('/cases/supreme')}>
+            إلغاء
+          </Button>
+          <Button variant="primary" icon="save" onClick={handleSubmit}>
+            {isNew ? 'إضافة القضية' : 'حفظ التعديلات'}
+          </Button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>

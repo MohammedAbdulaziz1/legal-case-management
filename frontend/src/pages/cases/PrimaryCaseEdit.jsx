@@ -406,10 +406,10 @@ const PrimaryCaseEdit = () => {
 
             <CaseDocuments ref={documentsRef} caseType="primary" caseId={id} />
 
-             {!isNew && (
+             {/* {!isNew && (
               <Card className="p-6 sticky top-6">
                 <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
-                {/* <div className="flex flex-col gap-2 mb-4">
+                <div className="flex flex-col gap-2 mb-4">
                   <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
                   <Select
                     value={formData.status}
@@ -419,7 +419,7 @@ const PrimaryCaseEdit = () => {
                       label: CASE_STATUS_LABELS[value]
                     }))}
                   />
-                </div> */}
+                </div>
                 <div className="flex flex-col gap-2 mb-4">
                   <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
                   <div className="flex items-center gap-3">
@@ -448,7 +448,7 @@ const PrimaryCaseEdit = () => {
                   </div>
                 </div>
               </Card>
-            )}
+            )} */}
           </div>
         </div>
       </form>

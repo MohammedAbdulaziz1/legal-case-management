@@ -486,13 +486,13 @@ const AppealCaseDetail = () => {
           <Card className="p-6">
             <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
             <div className="flex flex-col gap-4 mb-4">
-              <div>
+              {/* <div>
                 <label className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 block">الحالة الحالية</label>
                 <StatusBadge status={caseData.status || CASE_STATUSES.ACTIVE}>
                   {CASE_STATUS_LABELS[caseData.status] || 'قيد الإجراء'}
                 </StatusBadge>
-              </div>
-              <div>
+              </div> */}
+              {/* <div>
                 <label className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 block">الأولوية</label>
                 <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium ${
                   caseData.priority === 'urgent' 
@@ -501,7 +501,7 @@ const AppealCaseDetail = () => {
                 }`}>
                   {caseData.priority === 'urgent' ? 'مستعجلة' : 'عادية'}
                 </div>
-              </div>
+              </div> */}
             </div>
             <div className="border-t border-slate-200 dark:border-slate-700 my-4"></div>
             <div className="space-y-3">

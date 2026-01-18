@@ -270,6 +270,14 @@ const AppealCaseEdit = () => {
               : 'يرجى تحديث البيانات بدقة، سيتم حفظ نسخة من البيانات القديمة في الأرشيف.'}
           </p>
         </div>
+        <div className="flex gap-3">
+          <Button variant="secondary" icon="close" onClick={() => navigate('/cases/appeal')}>
+            إلغاء
+          </Button>
+          <Button variant="primary" icon="save" onClick={handleSubmit}>
+            {isNew ? 'إضافة القضية' : 'حفظ التعديلات'}
+          </Button>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -375,17 +383,6 @@ const AppealCaseEdit = () => {
                   error={errors.appealedBy}
                   required
                   placeholder="من قام بالاستئناف"
-                />
-              <DualDateInput
-                  label="تاريخ الجلسة"
-                  value={formData.sessionDate}
-                  onChange={(val) => {
-                    handleChange('sessionDate', val)
-                    if (errors.sessionDate) setErrors(prev => ({ ...prev, sessionDate: '' }))
-                  }}
-                  error={errors.sessionDate}
-                  required
-                  hijriOnly={true}
                 />
                  <DualDateInput
                   label="تاريخ الحكم"
@@ -519,11 +516,11 @@ const AppealCaseEdit = () => {
           
 
              <CaseDocuments ref={documentsRef} caseType="appeal" caseId={id} />
-            
+{/*             
               {!isNew ? (
                 <Card className="p-6 sticky top-6">
                   <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
-                  {/* <div className="flex flex-col gap-2 mb-4">
+                  <div className="flex flex-col gap-2 mb-4">
                     <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
                     <Select
                       value={formData.status}
@@ -533,7 +530,7 @@ const AppealCaseEdit = () => {
                         label: CASE_STATUS_LABELS[value]
                       }))}
                     />
-                  </div> */}
+                  </div>
                   <div className="flex flex-col gap-2 mb-4">
                     <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
                     <div className="flex items-center gap-3">
@@ -582,7 +579,7 @@ const AppealCaseEdit = () => {
                     </Button>
                   </div>
                 </Card>
-              )}
+              )} */}
           </div>
         </div>
       </form>

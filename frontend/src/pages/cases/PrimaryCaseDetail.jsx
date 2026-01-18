@@ -489,7 +489,7 @@ const PrimaryCaseDetail = () => {
                   </p>
                 </div>
               </div>
-              <div className="flex items-center gap-3">
+              {/* <div className="flex items-center gap-3">
                 <div className="size-10 rounded-full bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400 flex items-center justify-center">
                   <span className="material-symbols-outlined">priority_high</span>
                 </div>
@@ -499,7 +499,7 @@ const PrimaryCaseDetail = () => {
                     {caseData.priority || 'غير محدد'}
                   </p>
                 </div>
-              </div>
+              </div> */}
             </div>
           </Card>
 
