@@ -11,6 +11,7 @@ import CaseSessionsEditor from '../../components/cases/CaseSessionsEditor'
 import { CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { validateCaseForm } from '../../utils/validation'
 import { caseService } from '../../services/caseService'
+import { archiveService } from '../../services/archiveService'
 import { useAuth } from '../../context/AuthContext'
 import { formatDateHijri } from '../../utils/hijriDate'
 
@@ -22,6 +23,7 @@ const PrimaryCaseEdit = () => {
   const [errors, setErrors] = useState({})
   const [loading, setLoading] = useState(!isNew)
   const documentsRef = useRef(null)
+  const [editInfo, setEditInfo] = useState(null)
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
@@ -60,6 +62,57 @@ const PrimaryCaseEdit = () => {
       fetchCase()
     }
   }, [id, isNew, currentUser])
+
+  useEffect(() => {
+    const loadEditInfo = async () => {
+      if (isNew || !id) {
+        setEditInfo(null)
+        return
+      }
+
+      try {
+        const resp = await archiveService.getCaseHistory(id, 'primary')
+        const entries = resp?.data?.entries || []
+        const updated = entries.find((e) => {
+          const a = (e?.action || '').toString().toLowerCase()
+          return a.includes('update') || a.includes('edit')
+        })
+
+        if (!updated) {
+          setEditInfo(null)
+          return
+        }
+
+        setEditInfo({
+          userName: updated?.user?.name || '',
+          savedAt: updated?.createdAt || updated?.created_at || '',
+        })
+      } catch (err) {
+        console.error('Error fetching primary case archive history:', err)
+        setEditInfo(null)
+      }
+    }
+
+    loadEditInfo()
+  }, [id, isNew])
+
+  const formatArabicDateTime = (value) => {
+    if (!value) return ''
+    try {
+      const d = new Date(value)
+      if (Number.isNaN(d.getTime())) return String(value)
+      return new Intl.DateTimeFormat('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }).format(d)
+    } catch {
+      return String(value)
+    }
+  }
 
   const fetchCase = async () => {
     try {
@@ -381,28 +434,30 @@ const PrimaryCaseEdit = () => {
           </div>
 
           <div className="space-y-6">
-            <Card title="معلومات التعديل" className="p-6">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-                    <span className="material-symbols-outlined">person_edit</span>
+            {editInfo && (
+              <Card title="معلومات التعديل" className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                      <span className="material-symbols-outlined">person_edit</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">القائم بالتعديل الحالي</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{editInfo.userName || 'مستخدم'}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">القائم بالتعديل الحالي</p>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">أحمد المحمدي</p>
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 flex items-center justify-center">
+                      <span className="material-symbols-outlined">update</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">تاريخ آخر حفظ</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatArabicDateTime(editInfo.savedAt) || 'غير محدد'}</p>
+                    </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="size-10 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 flex items-center justify-center">
-                    <span className="material-symbols-outlined">update</span>
-                  </div>
-                  <div>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">تاريخ آخر حفظ</p>
-                    <p className="text-sm font-semibold text-slate-900 dark:text-white">٢٤ مايو ٢٠٢٣، ١٠:٣٠ ص</p>
-                  </div>
-                </div>
-              </div>
-            </Card>
+              </Card>
+            )}
 
             <CaseDocuments ref={documentsRef} caseType="primary" caseId={id} />
 

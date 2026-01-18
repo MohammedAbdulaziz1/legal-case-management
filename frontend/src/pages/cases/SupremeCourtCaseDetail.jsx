@@ -460,8 +460,8 @@ const SupremeCourtCaseDetail = () => {
         </div>
 
         <div className="lg:col-span-4 flex flex-col gap-6">
-          <Card className="p-6">
-            <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
+          <Card title="معلومات القضية" className="p-6">
+            {/* <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
             <div className="mb-4">
               <label className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 block">الحالة الحالية</label>
               <StatusBadge status={caseData.status || CASE_STATUSES.ACTIVE}>
@@ -474,7 +474,7 @@ const SupremeCourtCaseDetail = () => {
                 {caseData.priority === 'urgent' ? 'مستعجلة' : caseData.priority === 'normal' ? 'عادية' : (caseData.priority || 'غير محدد')}
               </p>
             </div>
-            <div className="border-t border-slate-200 dark:border-slate-700 my-4"></div>
+            <div className="border-t border-slate-200 dark:border-slate-700 my-4"></div> */}
             <div className="space-y-3">
               <div className="flex items-center gap-3">
                 <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">

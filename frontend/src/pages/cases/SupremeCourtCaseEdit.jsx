@@ -11,6 +11,7 @@ import CaseDocuments from '../../components/cases/CaseDocuments'
 import CaseSessionsEditor from '../../components/cases/CaseSessionsEditor'
 import { APPEALED_PARTIES_LABLES, CASE_STATUSES, CASE_STATUS_LABELS, USER_ROLES } from '../../utils/constants'
 import { caseService } from '../../services/caseService'
+import { archiveService } from '../../services/archiveService'
 import { useAuth } from '../../context/AuthContext'
 import { formatDateHijri } from '../../utils/hijriDate'
 
@@ -21,6 +22,7 @@ const SupremeCourtCaseEdit = () => {
   const isNew = id === 'new' || !id
   const [loading, setLoading] = useState(!isNew)
   const documentsRef = useRef(null)
+  const [editInfo, setEditInfo] = useState(null)
   const [formData, setFormData] = useState({
     caseNumber: '',
     registrationDate: '',
@@ -123,6 +125,57 @@ const SupremeCourtCaseEdit = () => {
       }
     }
   }, [id, isNew, currentUser])
+
+  useEffect(() => {
+    const loadEditInfo = async () => {
+      if (isNew || !id) {
+        setEditInfo(null)
+        return
+      }
+
+      try {
+        const resp = await archiveService.getCaseHistory(id, 'supreme')
+        const entries = resp?.data?.entries || []
+        const updated = entries.find((e) => {
+          const a = (e?.action || '').toString().toLowerCase()
+          return a.includes('update') || a.includes('edit')
+        })
+
+        if (!updated) {
+          setEditInfo(null)
+          return
+        }
+
+        setEditInfo({
+          userName: updated?.user?.name || '',
+          savedAt: updated?.createdAt || updated?.created_at || '',
+        })
+      } catch (err) {
+        console.error('Error fetching supreme case archive history:', err)
+        setEditInfo(null)
+      }
+    }
+
+    loadEditInfo()
+  }, [id, isNew])
+
+  const formatArabicDateTime = (value) => {
+    if (!value) return ''
+    try {
+      const d = new Date(value)
+      if (Number.isNaN(d.getTime())) return String(value)
+      return new Intl.DateTimeFormat('ar-SA', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      }).format(d)
+    } catch {
+      return String(value)
+    }
+  }
 
   const applyAppealPrefill = (allAppeals, appealId) => {
     const selected = (allAppeals || []).find(
@@ -386,17 +439,6 @@ const SupremeCourtCaseEdit = () => {
                     { value: APPEALED_PARTIES_LABLES[2], label: APPEALED_PARTIES_LABLES[2] },
                   ]}
                 />
-                 <DualDateInput
-                  label="تاريخ الجلسة"
-                  value={formData.sessionDate}
-                  onChange={(val) => {
-                    handleChange('sessionDate', val)
-                    if (errors.sessionDate) setErrors(prev => ({ ...prev, sessionDate: '' }))
-                  }}
-                  error={errors.sessionDate}
-                  required
-                  hijriOnly={true}
-                />
                  <Select
                   label="حكم المحكمة العليا"
                   value={formData.supremeCourtJudgment}
@@ -419,7 +461,7 @@ const SupremeCourtCaseEdit = () => {
                     if (errors.judgementdate) setErrors(prev => ({ ...prev, judgementdate: '' }))
                   }}
                   error={errors.judgementdate}
-                  required
+                  
                   hijriOnly={true}
                 />
                 
@@ -431,20 +473,20 @@ const SupremeCourtCaseEdit = () => {
                     if (errors.judgementrecivedate) setErrors(prev => ({ ...prev, judgementrecivedate: '' }))
                   }}
                   error={errors.judgementrecivedate}
-                  required
+                  
                   hijriOnly={true}
                 />
                 <Input  
                   label="المحكمة العليا"
                   value={formData.court}
                   onChange={(e) => handleChange('court', e.target.value)}
-                  required
+                  
                 />
                 <Input
                   label="اسم القاضي"
                   value={formData.judge}
                   onChange={(e) => handleChange('judge', e.target.value)}
-                  required
+                  
                 />
               </div>
             </Card>
@@ -506,11 +548,35 @@ const SupremeCourtCaseEdit = () => {
           </div>
 
           <div className="lg:col-span-4 flex flex-col gap-6">
+            {editInfo && (
+              <Card title="معلومات التعديل" className="p-6">
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+                      <span className="material-symbols-outlined">person_edit</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">القائم بالتعديل الحالي</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{editInfo.userName || 'مستخدم'}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-900/20 dark:text-emerald-400 flex items-center justify-center">
+                      <span className="material-symbols-outlined">update</span>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">تاريخ آخر حفظ</p>
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{formatArabicDateTime(editInfo.savedAt) || 'غير محدد'}</p>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            )}
             <CaseDocuments ref={documentsRef} caseType="supreme" caseId={id} />
-             {!isNew ? (
+             {/* {!isNew ? (
                 <Card className="p-6 sticky top-6">
                   <h3 className="font-bold text-lg text-slate-900 dark:text-white mb-6">حالة القضية</h3>
-                  {/* <div className="flex flex-col gap-2 mb-4">
+                  <div className="flex flex-col gap-2 mb-4">
                     <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الحالة الحالية</label>
                     <Select
                       value={formData.status}
@@ -520,7 +586,7 @@ const SupremeCourtCaseEdit = () => {
                         label: CASE_STATUS_LABELS[value]
                       }))}
                     />
-                  </div> */}
+                  </div>
                   <div className="flex flex-col gap-2 mb-4">
                     <label className="text-sm font-medium text-slate-500 dark:text-slate-400">الأولوية</label>
                     <div className="flex items-center gap-3">
@@ -569,7 +635,7 @@ const SupremeCourtCaseEdit = () => {
                     </Button>
                   </div>
                 </Card>
-              )}
+              )} */}
           </div>
         </div>
       </form>
