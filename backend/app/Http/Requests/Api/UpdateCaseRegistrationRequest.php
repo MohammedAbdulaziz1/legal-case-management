@@ -22,6 +22,8 @@ class UpdateCaseRegistrationRequest extends FormRequest
             'client' => ['nullable', 'string', 'max:255'],
             'opponent' => ['nullable', 'string', 'max:255'],
             'judge' => ['nullable', 'string', 'max:255'],
+            'judgementdate' => ['sometimes', 'date'],
+            'judgementrecivedate' => ['sometimes', 'date'],
             'status' => ['nullable', 'string', 'in:active,pending,judgment,closed,postponed'],
             'notes' => ['nullable', 'string'],
         ];
