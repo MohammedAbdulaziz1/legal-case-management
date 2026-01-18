@@ -44,7 +44,8 @@ const AppealCases = () => {
     if (selectedTab === 'judgment_issued') {
       list = list.filter((c) => {
         const st = (c?.status || '').toString()
-        return st === CASE_STATUSES.JUDGMENT || st === CASE_STATUSES.CLOSED
+        const statusIssued = st === CASE_STATUSES.JUDGMENT || st === CASE_STATUSES.CLOSED
+        return statusIssued || isCaseDecided(c)
       })
     }
 
@@ -177,7 +178,7 @@ const AppealCases = () => {
     }
   }
 
-  const getJudgmentType = (judgment) => {
+  function getJudgmentType(judgment) {
     if (!judgment) return JUDGMENT_TYPES.PENDING
      
     const judgmentLower = judgment.toLowerCase()
@@ -196,7 +197,7 @@ const AppealCases = () => {
     return JUDGMENT_TYPES.PENDING
   }
 
-  const isCaseDecided = (caseItem) => {
+  function isCaseDecided(caseItem) {
     const appealJudgment = (caseItem?.appealJudgment || '').toString().trim()
     const t = getJudgmentType(appealJudgment)
     return t !== JUDGMENT_TYPES.PENDING && t !== JUDGMENT_TYPES.POSTPONED
@@ -388,13 +389,26 @@ const AppealCases = () => {
                     const appealRemainingDays = (() => {
                       const value = caseItem?.judgementrecivedate
                       if (!value) return null
-                      const m = value.toString().trim().match(/^(\d{4})-(\d{2})-(\d{2})$/)
-                      if (!m) return null
-                      const y = parseInt(m[1], 10)
-                      const mo = parseInt(m[2], 10)
-                      const d = parseInt(m[3], 10)
-                      const received = new Date(y, mo - 1, d)
-                      if (Number.isNaN(received.getTime())) return null
+
+                      const raw = value.toString().trim()
+                      let received = null
+
+                      const m = raw.match(/^(\d{4})-(\d{2})-(\d{2})/)
+                      if (m) {
+                        const y = parseInt(m[1], 10)
+                        const mo = parseInt(m[2], 10)
+                        const d = parseInt(m[3], 10)
+                        const dt = new Date(y, mo - 1, d)
+                        if (!Number.isNaN(dt.getTime())) received = dt
+                      }
+
+                      if (!received) {
+                        const dt = new Date(raw)
+                        if (!Number.isNaN(dt.getTime())) received = dt
+                      }
+
+                      if (!received) return null
+
                       const today = new Date()
                       today.setHours(0, 0, 0, 0)
                       received.setHours(0, 0, 0, 0)

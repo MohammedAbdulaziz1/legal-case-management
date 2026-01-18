@@ -247,7 +247,7 @@ export default function PrimaryCases() {
     return JUDGMENT_TYPES.PENDING
   }
 
-  const isCaseDecided = (caseItem) => {
+  function isCaseDecided(caseItem) {
     const judgmentText = caseItem?.firstInstanceJudgment || caseItem?.judgment
     const t = getJudgmentType((judgmentText || '').toString())
     return t !== JUDGMENT_TYPES.PENDING && t !== JUDGMENT_TYPES.POSTPONED
@@ -300,7 +300,8 @@ export default function PrimaryCases() {
     if (selectedTab === 'judgment_issued') {
       list = list.filter((c) => {
         const st = (c?.status || '').toString()
-        return st === CASE_STATUSES.JUDGMENT || st === CASE_STATUSES.CLOSED
+        const statusIssued = st === CASE_STATUSES.JUDGMENT || st === CASE_STATUSES.CLOSED
+        return statusIssued || isCaseDecided(c)
       })
     }
 

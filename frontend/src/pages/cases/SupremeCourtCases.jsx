@@ -44,7 +44,8 @@ const SupremeCourtCases = () => {
     if (selectedTab === 'judgment_issued') {
       list = list.filter((c) => {
         const st = (c?.status || '').toString()
-        return st === CASE_STATUSES.JUDGMENT || st === CASE_STATUSES.CLOSED
+        const statusIssued = st === CASE_STATUSES.JUDGMENT || st === CASE_STATUSES.CLOSED
+        return statusIssued || isCaseDecided(c)
       })
     }
 
@@ -176,7 +177,7 @@ const SupremeCourtCases = () => {
     }
   }
 
-const getJudgmentType = (judgment) => {
+function getJudgmentType(judgment) {
     if (!judgment) return JUDGMENT_TYPES.PENDING
      
     const judgmentLower = judgment.toLowerCase()
@@ -195,7 +196,7 @@ const getJudgmentType = (judgment) => {
     return JUDGMENT_TYPES.PENDING
   }
 
-  const isCaseDecided = (caseItem) => {
+  function isCaseDecided(caseItem) {
     const judgmentText = (caseItem?.supremeCourtJudgment || '').toString().trim()
     const t = getJudgmentType(judgmentText)
     return t !== JUDGMENT_TYPES.PENDING && t !== JUDGMENT_TYPES.POSTPONED
