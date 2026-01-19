@@ -141,7 +141,7 @@ const Login = () => {
 
           <div className="mt-10 pt-6 border-t border-slate-200 dark:border-slate-800">
             <p className="text-xs text-center text-slate-400 dark:text-slate-500">
-              © 2024 وزارة العدل - جميع الحقوق محفوظة
+              ©  2026 متحدون سما - جميع الحقوق محفوظة
             </p>
           </div>
         </div>
