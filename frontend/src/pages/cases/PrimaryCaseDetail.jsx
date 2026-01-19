@@ -449,6 +449,7 @@ const PrimaryCaseDetail = () => {
                   <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                     <tr>
                       <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
+                      <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">الوقت</th>
                       <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">ملاحظات</th>
                     </tr>
                   </thead>
@@ -456,6 +457,7 @@ const PrimaryCaseDetail = () => {
                     {sessions.map((s) => (
                       <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors">
                         <td className="px-4 py-3 whitespace-nowrap text-slate-900 dark:text-slate-100">{formatDateHijri(s.sessionDate) || 'غير محدد'}</td>
+                        <td className="px-4 py-3 whitespace-nowrap text-slate-700 dark:text-slate-300">{s.sessionTime || '—'}</td>
                         <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{s.notes || '—'}</td>
                       </tr>
                     ))}

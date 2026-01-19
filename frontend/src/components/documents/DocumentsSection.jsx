@@ -227,8 +227,8 @@ const DocumentsSection = () => {
     <div className="mt-8">
       <Card>
         <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50 dark:bg-slate-800/30">
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <span className="material-symbols-outlined text-slate-400">folder</span>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary">folder</span>
             المستندات
           </h3>
           <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">

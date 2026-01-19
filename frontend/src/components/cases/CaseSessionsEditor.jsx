@@ -12,7 +12,7 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
 
   const [isSessionModalOpen, setIsSessionModalOpen] = useState(false)
   const [editingSession, setEditingSession] = useState(null)
-  const [sessionForm, setSessionForm] = useState({ sessionDate: '', notes: '' })
+  const [sessionForm, setSessionForm] = useState({ sessionDate: '', sessionTime: '', notes: '' })
   const [sessionFormErrors, setSessionFormErrors] = useState({})
 
   const fetchSessions = async () => {
@@ -47,7 +47,7 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
 
   const openAddSessionModal = () => {
     setEditingSession(null)
-    setSessionForm({ sessionDate: '', notes: '' })
+    setSessionForm({ sessionDate: '', sessionTime: '', notes: '' })
     setSessionFormErrors({})
     setIsSessionModalOpen(true)
   }
@@ -56,6 +56,7 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
     setEditingSession(s)
     setSessionForm({
       sessionDate: s?.sessionDate || '',
+      sessionTime: s?.sessionTime || '',
       notes: s?.notes || '',
     })
     setSessionFormErrors({})
@@ -65,7 +66,7 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
   const closeSessionModal = () => {
     setIsSessionModalOpen(false)
     setEditingSession(null)
-    setSessionForm({ sessionDate: '', notes: '' })
+    setSessionForm({ sessionDate: '', sessionTime: '', notes: '' })
     setSessionFormErrors({})
   }
 
@@ -81,6 +82,7 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
       if (editingSession?.id) {
         await sessionService.updateSession(editingSession.id, {
           sessionDate: sessionForm.sessionDate,
+          sessionTime: sessionForm.sessionTime,
           notes: sessionForm.notes,
         })
       } else {
@@ -88,6 +90,7 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
           caseType,
           caseNumber,
           sessionDate: sessionForm.sessionDate,
+          sessionTime: sessionForm.sessionTime || undefined,
           notes: sessionForm.notes,
         })
       }
@@ -143,6 +146,7 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
               <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
                 <tr>
                   <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">تاريخ الجلسة</th>
+                  <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap">الوقت</th>
                   <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">ملاحظات</th>
                   <th className="px-4 py-3 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center">الإجراءات</th>
                 </tr>
@@ -150,9 +154,8 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {sessions.map((s) => (
                   <tr key={s.id || s.sessionDate}>
-                    <td className="px-4 py-3 whitespace-nowrap text-slate-900 dark:text-slate-100">
-                      {formatDateHijri(s.sessionDate) || 'غير محدد'}
-                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-900 dark:text-slate-100">{formatDateHijri(s.sessionDate) || 'غير محدد'}</td>
+                    <td className="px-4 py-3 whitespace-nowrap text-slate-700 dark:text-slate-300">{s.sessionTime || '—'}</td>
                     <td className="px-4 py-3 text-slate-600 dark:text-slate-400">{s.notes || '-'}</td>
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-center gap-2">
@@ -228,6 +231,16 @@ const CaseSessionsEditor = ({ caseType, caseNumber, enabled = true, canEdit = tr
               {sessionFormErrors.sessionDate && (
                 <p className="text-xs text-red-600 dark:text-red-400 -mt-2">{sessionFormErrors.sessionDate}</p>
               )}
+
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">وقت الجلسة (اختياري)</label>
+                <input
+                  type="time"
+                  value={sessionForm.sessionTime}
+                  onChange={(e) => setSessionForm((p) => ({ ...p, sessionTime: e.target.value }))}
+                  className="w-full rounded-lg border py-2.5 pr-4 pl-4 text-sm text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-primary/50 focus:border-primary"
+                />
+              </div>
 
               <div>
                 <label className="block text-sm font-semibold text-slate-700 dark:text-slate-200 mb-1">ملاحظات</label>
