@@ -18,6 +18,7 @@ class CaseSessionResource extends JsonResource
             'id' => $this->id,
             'caseType' => $this->case_type,
             'caseNumber' => $this->case_number,
+            'caseId' => $this->resource->getCaseId(),
             'sessionDate' => $this->session_date?->format('Y-m-d'),
             'notes' => $this->notes,
             'createdAt' => $this->created_at?->format('Y-m-d H:i:s'),
