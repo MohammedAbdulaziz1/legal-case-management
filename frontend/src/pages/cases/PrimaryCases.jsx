@@ -198,7 +198,9 @@ export default function PrimaryCases() {
           judge: ci.judge || '',
           first_instance_judgment: ci.firstInstanceJudgment || ci.first_instance_judgment || ci.judgment || '',
           status: ci.status || '',
-          notes: ci.notes || ''
+          notes: ci.notes || '',
+          judgementdate: ci.judgementdate || '',
+          judgementrecivedate: ci.judgementrecivedate || '',
         }))
 
         const ws = XLSX.utils.json_to_sheet(data)
@@ -455,7 +457,7 @@ export default function PrimaryCases() {
                       رقم الدعوى
                     </th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap" scope="col">
-                      تاريخ الدعوى
+                      تاريخ تقييد الدعوى
                     </th>
 
                     {selectedTab === 'under_process' && (
@@ -480,12 +482,18 @@ export default function PrimaryCases() {
                       </>
                     )}
 
-                    <th
+                    {/* <th
                     className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap min-w-[200px] text-center" scope="col">
                       موضوع الدعوى
-                    </th>
+                    </th> */}
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center" scope="col">
                       الحكم
+                    </th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center" scope="col">
+                      تاريخ الحكم
+                    </th>
+                    <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center" scope="col">
+                      تاريخ استلام الحكم
                     </th>
                     <th className="px-6 py-4 font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap text-center" scope="col">
                       نتيجة القضية
@@ -558,13 +566,19 @@ export default function PrimaryCases() {
                           </>
                         )}
 
-                        <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-center">{caseItem.title || caseItem.subject || 'غير محدد'}</td>
+                        {/* <td className="px-6 py-4 text-slate-600 dark:text-slate-400 text-center">{caseItem.title || caseItem.subject || 'غير محدد'}</td> */}
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={judgment}>
                             {JUDGMENT_LABELS[judgment] || 'قيد المعالجة'}
                             
                            
                           </StatusBadge>
+                        </td>
+                        <td className="px-6 py-4 text-center text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                          {formatDateHijri(caseItem.judgementdate) || 'غير محدد'}
+                        </td>
+                        <td className="px-6 py-4 text-center text-slate-900 dark:text-slate-100 whitespace-nowrap">
+                          {formatDateHijri(caseItem.judgementrecivedate) || 'غير محدد'}
                         </td>
                         <td className="px-6 py-4 text-center">
                           <StatusBadge judgment={outcome}>
