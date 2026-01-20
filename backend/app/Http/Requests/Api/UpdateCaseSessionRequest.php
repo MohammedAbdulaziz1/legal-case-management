@@ -15,6 +15,7 @@ class UpdateCaseSessionRequest extends FormRequest
     {
         return [
             'session_date' => ['sometimes', 'date'],
+            'session_time' => ['nullable', 'date_format:H:i'],
             'notes' => ['nullable', 'string'],
         ];
     }

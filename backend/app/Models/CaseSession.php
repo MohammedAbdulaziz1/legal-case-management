@@ -12,6 +12,7 @@ class CaseSession extends Model
         'case_type',
         'case_number',
         'session_date',
+        'session_time',
         'notes',
     ];
 

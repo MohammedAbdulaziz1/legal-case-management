@@ -33,7 +33,13 @@ const Dashboard = () => {
       setSessionsError(null)
       const resp = await sessionService.getSessions({ per_page: 15, page: 1 })
       if (resp?.data?.success) {
-        setSessions(resp.data.data || [])
+        const list = resp.data.data || []
+        const sorted = [...list].sort((a, b) => {
+          const d = (a.sessionDate || '').localeCompare(b.sessionDate || '')
+          if (d !== 0) return d
+          return (a.sessionTime || '').localeCompare(b.sessionTime || '')
+        })
+        setSessions(sorted)
       }
     } catch (err) {
       console.error('Error fetching sessions:', err)
@@ -76,7 +82,7 @@ const Dashboard = () => {
 
   return (
     <Layout breadcrumbs={breadcrumbs} headerBreadcrumbs={headerBreadcrumbs}>
-      {/* الجلسات - all sessions, newest first */}
+      {/* الجلسات - all sessions, oldest to newest */}
       <h2 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-4">
         <span className="material-symbols-outlined text-primary">event</span>
         الجلسات
@@ -100,6 +106,7 @@ const Dashboard = () => {
               <thead>
                 <tr className="border-b border-slate-200 dark:border-slate-700">
                   <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700 dark:text-slate-300">التاريخ</th>
+                  <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700 dark:text-slate-300">الوقت</th>
                   <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700 dark:text-slate-300">نوع القضية</th>
                   <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700 dark:text-slate-300">رقم القضية</th>
                   <th className="px-4 py-3 text-right text-sm font-semibold text-slate-700 dark:text-slate-300">ملاحظات</th>
@@ -113,6 +120,7 @@ const Dashboard = () => {
                     onClick={() => s.caseId && s.caseType && navigate(`/cases/${s.caseType}/${s.caseId}`)}
                   >
                     <td className="px-4 py-3 text-slate-900 dark:text-slate-100 whitespace-nowrap">{formatDateHijri(s.sessionDate) || '—'}</td>
+                    <td className="px-4 py-3 text-slate-700 dark:text-slate-300 whitespace-nowrap">{s.sessionTime || '—'}</td>
                     <td className="px-4 py-3 text-slate-700 dark:text-slate-300">{CASE_TYPE_LABELS[s.caseType] || s.caseType}</td>
                     <td className="px-4 py-3 text-slate-900 dark:text-slate-100 font-medium">{s.caseNumber ?? '—'}</td>
                     <td className="px-4 py-3 text-slate-600 dark:text-slate-400 max-w-xs truncate" title={s.notes || ''}>{s.notes || '—'}</td>

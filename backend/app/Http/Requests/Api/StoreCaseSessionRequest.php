@@ -17,6 +17,7 @@ class StoreCaseSessionRequest extends FormRequest
             'case_type' => ['required', 'string', 'in:primary,appeal,supreme'],
             'case_number' => ['required', 'integer'],
             'session_date' => ['required', 'date'],
+            'session_time' => ['nullable', 'date_format:H:i'],
             'notes' => ['nullable', 'string'],
         ];
     }
